@@ -164,6 +164,31 @@ SetSystemMode - Set the operation mode of the robot. (TestMode Only)
     PowerCycle - Power cycles the entire system. (mutually exclusive of other options)
 ```
 
+#### Logs when doing a factory reset:
+```
+ARCHES Board (04.0x90c973a5)
+Press enter twice within the next 2 seconds for boot menu
+
+Dustbin open , Right Side Bumper and Right Front Bumper closed....
+Booting Factory Image...Loading FACTORY SECURE/ENCRYPTED image ...
+initialize_sdmmc finished. sdmmc.sdmmc_pbase=481D8000
+
+
+
+Factory Mode: Restoring Image.
+32768+0 records in
+32768+0 records out
+32768+0 records in
+32768+0 records out
+Initializing UI
+cp: Can't open source file.  (/emmc/uiFactory)
+Resetting wifi
+/etc/factory_reset.sh[69]: [: missing ]
+Reset Security
+Reset complete. Rebooting
+Shutting down daemons...
+Shutting down filesystems...
+```
 
 #### Shutdown the robot fully
 ```

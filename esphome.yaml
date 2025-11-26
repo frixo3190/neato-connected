@@ -1,0 +1,255 @@
+
+logger:
+  baud_rate: 0
+  tx_buffer_size: 65535
+
+uart:
+  baud_rate: 115200
+  tx_pin: GPIO1
+  rx_pin: GPIO13
+  rx_buffer_size: 65535
+  debug:
+    dummy_receiver: true
+    direction: RX
+    after:
+      bytes: 0
+      #timeout: 100ms
+      #delimiter: "\r\n"
+      delimiter: "\x1A"
+    sequence:
+      - lambda: |-
+          UARTDebug::log_string(direction, bytes);
+
+          // convert bytes -> std::string
+          std::string str(bytes.begin(), bytes.end());
+
+          id(rawString).publish_state(str.c_str());
+
+          // ---- TRIM FUNCTION ----
+          auto trim = [](std::string &s) {
+            // trim leading
+            s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                [](unsigned char ch){ return !std::isspace(ch); }));
+            // trim trailing
+            s.erase(std::find_if(s.rbegin(), s.rend(),
+                [](unsigned char ch){ return !std::isspace(ch); }).base(), s.end());
+          };
+
+          // ---- SPLIT ON CRLF ----
+          std::vector<std::string> lines;
+          size_t start = 0;
+          size_t end = 0;
+
+          while ((end = str.find("\r\n", start)) != std::string::npos) {
+            std::string line = str.substr(start, end - start);
+            trim(line);
+            if (!line.empty()) lines.push_back(line);
+            start = end + 2;
+          }
+
+          if (start < str.size()) {
+            std::string last = str.substr(start);
+            trim(last);
+            if (!last.empty()) lines.push_back(last);
+          }
+
+          if (lines.empty()) return;
+
+          // ---- DETECT WHICH COMMAND WAS USED ----
+          std::string command = lines[0];  // first line (GetErr, GetState, etc.)
+
+          ESP_LOGI("uart_parser", "COMMAND: %s", command.c_str());
+
+          // ---- SPECIAL PARSING FOR GetErr ----
+          if (command == "GetErr") {
+            // A GetErr response looks like:
+            // 0: GetErr
+            // 1: Error
+            // 2: <error1>
+            // 3: Alert
+            // 4: <error2>
+            // 5: USB state
+            // 6: NOT connected
+
+            id(robotError).publish_state(lines[2].c_str());
+            id(robotAlert).publish_state(lines[4].c_str());
+          }
+          else if (command == "GetCharger") {
+            // Format after the header:
+            // Label,Value
+            // FuelPercent,53
+            // BatteryOverTemp,0
+            // ...
+
+            for (size_t i = 2; i < lines.size(); i++) {
+              std::string &line = lines[i];
+
+              size_t comma = line.find(',');
+              if (comma == std::string::npos) continue;
+
+              std::string key = line.substr(0, comma);
+              std::string value = line.substr(comma + 1);
+
+              // Trim them:
+              trim(key);
+              trim(value);
+
+              ESP_LOGI("charger", "Parsed: key='%s' value='%s'",
+                        key.c_str(), value.c_str());
+
+              // ---- MATCH KEYS AND PUBLISH ----
+              if (key == "FuelPercent") id(chargerFuelPercent).publish_state(value.c_str());
+              else if (key == "BatteryOverTemp") id(chargerBatteryOverTemp).publish_state(value.c_str());
+              else if (key == "ChargingActive") id(chargerChargingActive).publish_state(value.c_str());
+              else if (key == "ChargingEnabled") id(chargerChargingEnabled).publish_state(value.c_str());
+              else if (key == "ConfidentOnFuel") id(chargerConfidentOnFuel).publish_state(value.c_str());
+              else if (key == "OnReservedFuel") id(chargerOnReservedFuel).publish_state(value.c_str());
+              else if (key == "EmptyFuel") id(chargerEmptyFuel).publish_state(value.c_str());
+              else if (key == "BatteryFailure") id(chargerBatteryFailure).publish_state(value.c_str());
+              else if (key == "ExtPwrPresent") id(chargerExtPwrPresent).publish_state(value.c_str());
+              else if (key == "ThermistorPresent") id(chargerThermistorPresent).publish_state(value.c_str());
+              else if (key == "BattTempCAvg") id(chargerBattTempCAvg).publish_state(value.c_str());
+              else if (key == "VBattV") id(chargerVBattV).publish_state(value.c_str());
+              else if (key == "VExtV") id(chargerVExtV).publish_state(value.c_str());
+              else if (key == "Charger_mAH") id(chargerCharger_mAH).publish_state(value.c_str());
+              else if (key == "Discharge_mAH") id(chargerDischarge_mAH).publish_state(value.c_str());
+            }
+          }
+
+
+          // ---- OPTIONAL: print each line for debugging ----
+          //for (auto &line : lines) {
+            //std::vector<uint8_t> v(line.begin(), line.end());
+            //UARTDebug::log_string(direction, v);
+            //ESP_LOGI("uart_parser", "LINE: %s", line.c_str());
+          //}
+
+
+text_sensor:
+  - platform: template
+    id: rawString
+    name: "UART msg"
+
+  - platform: template
+    id: robotError
+    name: "Robot Error"
+
+  - platform: template
+    id: robotAlert
+    name: "Robot Alert"
+
+     # --- Charger diagnostics ---
+  - platform: template
+    id: chargerFuelPercent
+    name: "Fuel Percent"
+
+  - platform: template
+    id: chargerBatteryOverTemp
+    name: "Battery Over Temp"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerChargingActive
+    name: "Charging Active"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerChargingEnabled
+    name: "Charging Enabled"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerConfidentOnFuel
+    name: "Confident On Fuel"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerOnReservedFuel
+    name: "On Reserved Fuel"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerEmptyFuel
+    name: "Empty Fuel"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerBatteryFailure
+    name: "Battery Failure"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerExtPwrPresent
+    name: "Ext Power Present"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerThermistorPresent
+    name: "Thermistor Present"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerBattTempCAvg
+    name: "Battery Temp C Avg"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerVBattV
+    name: "Battery Voltage V"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerVExtV
+    name: "External Voltage V"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerCharger_mAH
+    name: "Charger mAh"
+    entity_category: "diagnostic"
+
+  - platform: template
+    id: chargerDischarge_mAH
+    name: "Discharge mAh"
+    entity_category: "diagnostic"
+
+button:
+  - platform: template
+    name: "Test Button 1 (clean)"
+    on_press:
+      - uart.write: "Clean \n"
+  - platform: template
+    name: "Test Button 2 (getver)"
+    on_press:
+      - uart.write: "GetVersion \n"
+  - platform: template
+    name: "Test Button 3 (GetCharger)"
+    on_press:
+      - uart.write: "GetCharger \n"
+  - platform: template
+    name: "Test Button 4 (GetState)"
+    on_press:
+      - uart.write: "GetState \n" 
+  - platform: template
+    name: "Get errors"
+    on_press:
+      - uart.write: "GetErr \n"  
+  - platform: template
+    name: "Testmode"
+    on_press:
+      - uart.write: "TestMode \n"  
+  - platform: template
+    name: "Testmode ON"
+    on_press:
+      - uart.write: "TestMode On \n"  
+  - platform: template
+    name: "Testmode OFF"
+    on_press:
+      - uart.write: "TestMode Off \n"    
+
+#if you need to send a request periodically to get response from the uart device 
+interval:
+  - interval: 10sec
+    then:
+      - uart.write: "GetErr \n"
+      - uart.write: "GetCharger \n"
