@@ -6,6 +6,33 @@ esphome:
       then:
         - uart.write: "GetVersion \n"
 
+api:
+  [...]
+  actions:
+    - action: send_cmd
+      variables:
+        command: string
+      then:
+        - uart.write: !lambda |-
+            // Convert to std::string
+            std::string s = command;
+
+            if (s.empty() || s.back() != '\n')
+              s += "\n";
+
+            // convert string → vector<uint8_t>
+            return std::vector<uint8_t>(s.begin(), s.end());
+
+    - action: play_sound
+      variables:
+        soundid: int
+      then:
+        - uart.write: !lambda |-
+            // Create std::string
+            std::string s = "PlaySound SoundId " + std::to_string(soundid) + "\n";
+            // convert string → vector<uint8_t>
+            return std::vector<uint8_t>(s.begin(), s.end());
+
 logger:
   baud_rate: 0
   tx_buffer_size: 65535
