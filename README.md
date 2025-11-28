@@ -28,6 +28,8 @@ The suspected 3.3v pin is 3.3v and I have been able to keep an esp32cam connecte
 
 Currently this is mainly a POC but I am working on making it an fully working controller for the robot. Currently the lamdba function is probably still very inefficient and needs cleanup after the LLM changed it.
 
+Look at [debug port connection](debug-port-connection.md) on how I drilled a hole to access the debug port, for this you don't even need to open the device.
+
 Currently a work in progress, currently it looks like this:
 
 ![controls](./pics/esphome/controls.png)
