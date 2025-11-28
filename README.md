@@ -26,9 +26,14 @@ Once the bot was working, my journey began. I have split up the different parts 
 ## Serial connection via ESPHOME
 The suspected 3.3v pin is 3.3v and I have been able to keep an esp32cam connected and running the configuration at [esphome.yaml](./esphome.yaml)
 
+**Note: I am still on version 3.2.0 since I havn't gotten my USB OTG cable, will be getting one soon so I can make sure this works on the latest... sorry about this** 
+
 Currently this is mainly a POC but I am working on making it an fully working controller for the robot. Currently the lamdba function is probably still very inefficient and needs cleanup after the LLM changed it.
 
 Look at [debug port connection](debug-port-connection.md) on how I drilled a hole to access the debug port, for this you don't even need to open the device.
+
+Stated to experiment with commands if it is possible to get the floormap stuff [experimentations](./command-experiments.md)
+The UserSettings thing is a little wierd for me, even when I toggle them, they don't always change, not sure if that is because the battery is low for me or the firmware version, but it seams to respect most of them except for WiFi, it still advertises it's AP when it is off, but coud be the older firmware!
 
 Currently a work in progress, currently it looks like this:
 

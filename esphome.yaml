@@ -4,8 +4,39 @@ esphome:
   on_boot:
     - priority: 600
       then:
-        - uart.write: "GetVersion \n"
+        - lambda: 'id(currentState).publish_state("Booting");'
+        - delay: 1min # the robot usally takes 30-60 sec to boot
+        - script.execute: get_all_data
 
+script:
+  - id: get_user_settings
+    mode: queued
+    then:
+      - delay: 100ms
+      - uart.write: "GetUserSettings \n"
+
+  - id: get_all_data
+    mode: queued
+    then: 
+      - uart.write: "GetErr \n"    
+      - uart.write: "GetState \n"    
+      - uart.write: "GetCharger \n"    
+      - uart.write: "GetVersion \n"    
+      - uart.write: "GetUserSettings \n"  
+      - uart.write: "TestMode \n"  
+
+#if you need to send a request periodically to get response from the uart device 
+interval:
+  - interval: 2sec
+    then:
+      - uart.write: "GetErr \n"
+      - uart.write: "GetState \n"
+  - interval: 2min
+    then: 
+      - uart.write: "GetCharger \n"
+
+
+# Enable Home Assistant API
 api:
   [...]
   actions:
@@ -57,8 +88,6 @@ uart:
 
           // convert bytes -> std::string
           std::string str(bytes.begin(), bytes.end());
-
-          id(rawString).publish_state(str.c_str());
 
           // ---- TRIM FUNCTION ----
           auto trim = [](std::string &s) {
@@ -167,16 +196,14 @@ uart:
               else if (key == "Time Local") id(timeLocal).publish_state(value.c_str());
               else if (key == "Time UTC") id(timeUTC).publish_state(value.c_str());
             }
-          } else if (command == "TestMode") {
-            for (auto &line : lines) {
-              trim(line);  // optional: remove extra spaces
-              if (line.find("TestMode: On") != std::string::npos) {
-                id(testMode).publish_state(true);
-              } else if (line.find("TestMode: Off") != std::string::npos) {
-                id(testMode).publish_state(false);
-              }
-            }
-          } else if (command == "GetState") {
+          }
+          // ------------------------------ TESTMODE -----------------------------------------
+          else if (command == "TestMode") {
+            ESP_LOGI("testmode", "LINE: %s", lines[1].c_str());
+            if (lines[1].find(": On") != std::string::npos) id(testMode).publish_state(true);
+            else if (lines[1].find(": Off") != std::string::npos) id(testMode).publish_state(false);
+          }
+          else if (command == "GetState") {
             for (auto &line : lines) {
               trim(line);  // remove whitespace
 
@@ -188,6 +215,52 @@ uart:
               }
             }
           }
+          else if (command == "GetUserSettings") {
+            for (auto &line : lines) {
+              trim(line);
+
+              // Skip lines that start with binary/invalid chars
+              if (!line.empty() && static_cast<unsigned char>(line[0]) >= 0x80) continue;
+
+              // ---- Key,Value lines ----
+              size_t comma = line.find(',');
+              if (comma != std::string::npos) {
+                std::string key = line.substr(0, comma);
+                std::string value = line.substr(comma + 1);
+                trim(key);
+                trim(value);
+
+                     if (key == "Language") id(language).publish_state(value.c_str());
+                else if (key == "ClickSounds") id(clickSounds).publish_state(value == "ON");
+                else if (key == "LED") id(led).publish_state(value == "ON");
+                //else if (key == "Wall Enable") id(wallEnable).publish_state(value.c_str());
+                else if (key == "Eco Mode") id(ecoMode).publish_state(value == "ON");
+                else if (key == "IntenseClean") id(intenseClean).publish_state(value == "ON");
+                else if (key == "WiFi") id(wifiOnOff).publish_state(value == "ON");
+                else if (key == "Melody Sounds") id(melodySounds).publish_state(value == "ON");
+                else if (key == "Warning Sounds") id(warningSounds).publish_state(value == "ON");
+                else if (key == "Bin Full Detect") id(binFullDetect).publish_state(value == "ON");
+                else if (key == "Filter Change Time (seconds)") id(filterChangeTime).publish_state(atof(value.c_str()));
+                else if (key == "Brush Change Time (seconds)") id(brushChangeTime).publish_state(atof(value.c_str()));
+                else if (key == "Dirt Bin Alert Reminder Interval (minutes)") id(dirtBinAlertReminder).publish_state(atof(value.c_str()));
+              } 
+              // ---- Special lines without commas ----
+              else if (line.find("Current Dirt Bin Runtime is:") == 0) {
+                std::string val = line.substr(strlen("Current Dirt Bin Runtime is:"));
+                trim(val);
+                id(currentDirtBinRuntime).publish_state(atof(val.c_str()));
+              } 
+              else if (line.find("Number of Cleanings where Dust Bin was Full is:") == 0) {
+                std::string val = line.substr(strlen("Number of Cleanings where Dust Bin was Full is:"));
+                trim(val);
+                id(numberDustBinFull).publish_state(atof(val.c_str()));
+              } 
+              else if (line.find("Schedule is Enabled") != std::string::npos) id(scheduleEnabled).publish_state(true);
+              else if (line.find("Schedule is Disabled") != std::string::npos) id(scheduleEnabled).publish_state(false);
+            }
+          }
+
+
 
           // ---- OPTIONAL: print each line for debugging ----
           //for (auto &line : lines) {
@@ -234,6 +307,33 @@ sensor:
     name: "Discharge mAh"
     unit_of_measurement: "mAh"
     entity_category: "diagnostic"
+
+  # --- GetUserSettings ---
+  - platform: template
+    name: "Filter Change Time"
+    id: filterChangeTime
+    unit_of_measurement: "s"
+
+  - platform: template
+    name: "Brush Change Time"
+    id: brushChangeTime
+    unit_of_measurement: "s"
+
+  - platform: template
+    name: "Dirt Bin Alert Reminder"
+    id: dirtBinAlertReminder
+    unit_of_measurement: "min"
+
+  - platform: template
+    name: "Current Dirt Bin Runtime"
+    id: currentDirtBinRuntime
+    unit_of_measurement: "s"
+
+  - platform: template
+    name: "Number of Full Dust Bin Cleanings"
+    id: numberDustBinFull
+    unit_of_measurement: "count"
+
 
 binary_sensor:
   # --- GetCharger ---
@@ -285,10 +385,6 @@ binary_sensor:
 
 text_sensor:
   - platform: template
-    id: rawString
-    name: "UART msg"
-
-  - platform: template
     id: robotError
     name: "Robot Error"
 
@@ -331,16 +427,138 @@ text_sensor:
   - platform: template
     name: "Current State"
     id: currentState
+  
+  # --- GetUserSettings ---
+  - platform: template
+    name: "Language"
+    id: language
 
 
 switch:
   - platform: template
     name: "Test Mode"
+    optimistic: true
     id: testMode
     turn_on_action:
       - uart.write: "TestMode On \n"
+      - delay: 100ms
+      - uart.write: "TestMode \n"
     turn_off_action:
       - uart.write: "TestMode Off \n"
+      - delay: 100ms
+      - uart.write: "TestMode \n"
+
+  - platform: template
+    name: "Click sounds"
+    optimistic: true
+    id: clickSounds
+    turn_on_action:
+      - uart.write: "SetUserSettings ButtonClick ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings ButtonClick OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "LED"
+    optimistic: true
+    id: led
+    turn_on_action:
+      - uart.write: "SetUserSettings StealthLED ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings StealthLED OFF \n"
+      - script.execute: get_user_settings
+
+  # - platform: template
+  #   name: "Wall Enable"
+  #   optimistic: true
+  #   id: clickSounds
+  #   turn_on_action:
+  #     - uart.write: "SetUserSettings ButtonClick ON \n"
+  #     - delay: 100ms
+  #     - uart.write: "GetUserSettings \n"
+  #   turn_off_action:
+  #     - uart.write: "SetUserSettings ButtonClick OFF \n"
+  #     - delay: 100ms
+  #     - uart.write: "GetUserSettings \n"
+
+  - platform: template
+    name: "Eco Mode"
+    optimistic: true
+    id: ecoMode
+    turn_on_action:
+      - uart.write: "SetUserSettings EcoMode ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings EcoMode OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "IntenseClean"
+    optimistic: true
+    id: intenseClean
+    turn_on_action:
+      - uart.write: "SetUserSettings IntenseClean ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings IntenseClean OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "WiFi"
+    optimistic: true
+    id: wifiOnOff
+    turn_on_action:
+      - uart.write: "SetUserSettings WiFi ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings WiFi OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "Melody Sounds"
+    optimistic: true
+    id: melodySounds
+    turn_on_action:
+      - uart.write: "SetUserSettings Melodies ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings Melodies OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "Warning Sounds"
+    optimistic: true
+    id: warningSounds
+    turn_on_action:
+      - uart.write: "SetUserSettings Warnings ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings Warnings OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "Bin Full Detect"
+    optimistic: true
+    id: binFullDetect
+    turn_on_action:
+      - uart.write: "SetUserSettings BinFullDetect ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings BinFullDetect OFF \n"
+      - script.execute: get_user_settings
+
+  - platform: template
+    name: "Schedule"
+    optimistic: true
+    id: scheduleEnabled
+    turn_on_action:
+      - uart.write: "SetUserSettings Schedule ON \n"
+      - script.execute: get_user_settings
+    turn_off_action:
+      - uart.write: "SetUserSettings Schedule OFF \n"
+      - script.execute: get_user_settings
 
 
 button:
@@ -355,24 +573,9 @@ button:
       - uart.write: "Clean Spot \n"
 
   - platform: template
-    name: "STOP"
+    name: "Pause Cleaning"
     on_press:
       - uart.write: "Clean Stop \n"
-
-  - platform: template
-    name: "Test Button 4 (GetState)"
-    on_press:
-      - uart.write: "GetState \n" 
-
-  - platform: template
-    name: "Get usersettings"
-    on_press:
-      - uart.write: "GetUserSettings \n"  
-
-  - platform: template
-    name: "gettime"
-    on_press:
-      - uart.write: "GetTime \n"  
 
   - platform: template
     name: "Locate Robot"
@@ -380,19 +583,9 @@ button:
       - uart.write: "PlaySound SoundId 20 \n"  
 
   - platform: template
-    name: "GetUsage"
+    name: "Update status"
+    entity_category: "diagnostic"
     on_press:
-      - uart.write: "GetUsage \n"    
+      - script.execute: get_all_data 
 
-#if you need to send a request periodically to get response from the uart device 
-interval:
-  - interval: 2sec
-    then:
-      - uart.write: "GetErr \n"
-      - uart.write: "GetState \n"
-  - interval: 2min
-    then: 
-      - uart.write: "GetCharger \n"
-  - interval: 30min
-    then: 
-      - uart.write: "TestMode \n"
+
