@@ -16,6 +16,53 @@ I will need to do more experimatation on this part; but this is a command to dri
 
 Stop the wheels: `SetMotor LWheelDisable RWheelDisable`
 
-
 Also, sometimes the robot says something about that it won't fall for that again (forgot to copy the message...), not exactly sure what causes it, I think it has to do if you try to send multiple commands on the same line or something? but will need to look into that I guess?
+
+I have now tested that you can send commands while reciving data and that the robot will execute them, it does do so. However I have a small problem, via esphome the `GetLdsScan` crashes my esp when the delimiter is set to the endbyte sent by the robot `\x1A`, it works when setting a line by line reading, so if the fully custom solution does come, then it would not be via esphome. Since the LDS scan takes a while to arrive, at least via the esphome console but that does however go via my ha and network, it was quite a lot faster via direct serial connection, but we would still need to queue the commands, something like like:
+1. GetErr (Could maybe happen every 10th loop)
+2. GetDigitalSensors    (bumper, dustbin & pickup)
+3. GetAnalogSensors     (drop-, mag- and wall-sensor)
+4. GetLdsScan           (lidar)
+5. Repeat
+
+GetState will no longer be needed as we will be in TestMode so this will always be `UIMGR_STATE_TESTMODE`.
+
+
+### Raw commands
+#### Keeping here for remembering
+
+[02:16:45.118][D][uart_debug:158]: <<< "GetDigitalSensors\r\n"
+[02:16:45.119][D][uart_debug:158]: <<< "Digital Sensor Name, Value\r\n"
+[02:16:45.119][D][uart_debug:158]: <<< "SNSR_DC_JACK_IS_IN,0\r\n"
+[02:16:45.119][D][uart_debug:158]: <<< "SNSR_DUSTBIN_IS_IN,1\r\n"
+[02:16:45.129][D][uart_debug:158]: <<< "SNSR_LEFT_WHEEL_EXTENDED,0\r\n"
+[02:16:45.145][D][uart_debug:158]: <<< "SNSR_RIGHT_WHEEL_EXTENDED,0\r\n"
+[02:16:45.157][D][uart_debug:158]: <<< "LSIDEBIT,0\r\n"
+[02:16:45.171][D][uart_debug:158]: <<< "LFRONTBIT,0\r\n"
+[02:16:45.185][D][uart_debug:158]: <<< "LLDSBIT,0\r\n"
+[02:16:45.200][D][uart_debug:158]: <<< "RSIDEBIT,0\r\n"
+[02:16:45.212][D][uart_debug:158]: <<< "RFRONTBIT,0\r\n"
+[02:16:45.223][D][uart_debug:158]: <<< "RLDSBIT,0\r\n"
+
+
+
+[02:17:58.028][D][uart_debug:158]: <<< "GetAnalogSensors\r\n"
+[02:17:58.028][D][uart_debug:158]: <<< "SensorName,Unit,Value\r\n"
+[02:17:58.028][D][uart_debug:158]: <<< "BatteryVoltage,mV,14585,\r\n"
+[02:17:58.028][D][uart_debug:158]: <<< "BatteryCurrent,mA,-238,\r\n"
+[02:17:58.041][D][uart_debug:158]: <<< "BatteryTemperature,mC,22800,\r\n"
+[02:17:58.054][D][uart_debug:158]: <<< "ExternalVoltage,mV,0,\r\n"
+[02:17:58.069][D][uart_debug:158]: <<< "AccelerometerX,mG,16,\r\n"
+[02:17:58.081][D][uart_debug:158]: <<< "AccelerometerY,mG,2,\r\n"
+[02:17:58.096][D][uart_debug:158]: <<< "AccelerometerZ,mG,963,\r\n"
+[02:17:58.113][D][uart_debug:158]: <<< "VacuumCurrent,mA,0,\r\n"
+[02:17:58.128][D][uart_debug:158]: <<< "SideBrushCurrent,mA,0,\r\n"
+[02:17:58.141][D][uart_debug:158]: <<< "MagSensorLeft,VAL,0,\r\n"
+[02:17:58.156][D][uart_debug:158]: <<< "MagSensorRight,VAL,0,\r\n"
+[02:17:58.171][D][uart_debug:158]: <<< "WallSensor,mm,255,\r\n"
+[02:17:58.184][D][uart_debug:158]: <<< "DropSensorLeft,mm,19,\r\n"
+[02:17:58.200][D][uart_debug:158]: <<< "DropSensorRight,mm,19,\r\n"
+
+
+
 
