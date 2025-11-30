@@ -1,12 +1,18 @@
 esphome:
-  [...]
+  name: espcam-test-sensor
+  friendly_name: espcam-test-sensor
 
   on_boot:
     - priority: 600
       then:
-        - lambda: 'id(currentState).publish_state("Booting");'
-        - delay: 1min # the robot usally takes 30-60 sec to boot
-        - script.execute: get_all_data
+        - lambda: 'id(robotState).publish_state("Booting...");'
+        # - delay: 1min # the robot usally takes 30-60 sec to boot
+        # - script.execute: get_all_data
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
 
 script:
   - id: get_user_settings
@@ -18,14 +24,46 @@ script:
   - id: get_all_data
     mode: queued
     then: 
-      - uart.write: "GetErr \n"    
+      - uart.write: "GetErr \n"  
+      - delay: 50ms  
       - uart.write: "GetState \n"    
+      - delay: 50ms  
       - uart.write: "GetCharger \n"    
+      - delay: 50ms  
       - uart.write: "GetVersion \n"    
+      - delay: 50ms  
       - uart.write: "GetUserSettings \n"  
-      - uart.write: "TestMode \n"  
+      - delay: 50ms  
+      - uart.write: "TestMode \n"
+  
+  - id: inital_data_get # when the robot has booted, run this inital fetch after 5 seconds of being able to send commands, the 5 sec needed to the robot can calculate battery levet etc.
+    mode: queued
+    then: 
+      - delay: 5sec
+      - script.execute: get_all_data
 
-#if you need to send a request periodically to get response from the uart device 
+  - id: robotShutdown
+    mode: queued
+    then:
+      - uart.write: "TestMode On \n"
+      - delay: 100ms
+      - uart.write: "SetSystemMode Shutdown \n"
+
+  - id: powercycle
+    mode: queued
+    then:
+      - lambda: 'id(initial_ready) = false;' # I want to refetch all data in case we powercycle
+      - uart.write: "TestMode On \n"
+      - delay: 100ms
+      - uart.write: "SetSystemMode PowerCycle \n"
+
+globals:
+  - id: initial_ready
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+# Get certain data often
 interval:
   - interval: 2sec
     then:
@@ -38,7 +76,27 @@ interval:
 
 # Enable Home Assistant API
 api:
-  [...]
+  encryption:
+    key: !!!!!YOUR KEY HERE!!!!!!
+  # actions:
+  #   - action: spot_clean
+  #     variables:
+  #       width: int
+  #       height: int
+  #     then:
+  #       - lambda: |-
+  #           // Clamp values between 100-400
+  #           if (width < 100) width = 100;
+  #           if (width > 400) width = 400;
+  #           if (height < 100) height = 100;
+  #           if (height > 400) height = 400;
+  #           char buf[64];
+  #           sprintf(buf, "Clean Spot Width %d Height %d \n", width, height);
+  #           id(uart_bus).write_str(buf);
+  #           ESP_LOGD("spot_clean", "Sending command: %s", buf);
+
+
+
   actions:
     - action: send_cmd
       variables:
@@ -48,6 +106,7 @@ api:
             // Convert to std::string
             std::string s = command;
 
+            // IMPORTANT: keep newline exactly like YAML version
             if (s.empty() || s.back() != '\n')
               s += "\n";
 
@@ -79,7 +138,7 @@ uart:
     direction: RX
     after:
       bytes: 0
-      #timeout: 100ms
+      #timeout: 5sec
       #delimiter: "\r\n"
       delimiter: "\x1A"
     sequence:
@@ -135,8 +194,18 @@ uart:
             // 5: USB state
             // 6: NOT connected
 
+            if (lines.size() < 7) return;
+            if (lines[1] != "Error" || lines[3] != "Alert") return;
+
             id(robotError).publish_state(lines[2].c_str());
             id(robotAlert).publish_state(lines[4].c_str());
+            id(usbConnected).publish_state(lines[6].find("NOT connected") == std::string::npos);
+
+            // If we can get erros/alerts, the system is ready for other commands:
+            if (!id(initial_ready)) {
+                id(initial_ready) = true;
+                id(inital_data_get).execute();
+            }
           }
           else if (command == "GetCharger") {
             // Format after the header:
@@ -202,19 +271,36 @@ uart:
             ESP_LOGI("testmode", "LINE: %s", lines[1].c_str());
             if (lines[1].find(": On") != std::string::npos) id(testMode).publish_state(true);
             else if (lines[1].find(": Off") != std::string::npos) id(testMode).publish_state(false);
-          }
+          } 
+          
           else if (command == "GetState") {
-            for (auto &line : lines) {
-              trim(line);  // remove whitespace
+              std::string &states_line = lines[1];  // "Current UI State is: ...\nCurrent Robot State is: ...\n\x1A"
 
-              const std::string prefix = "Current State is: ";
-              if (line.find(prefix) == 0) {
-                std::string state = line.substr(prefix.length());
-                trim(state);  // remove trailing spaces/newlines
-                id(currentState).publish_state(state.c_str());
+              size_t sep = states_line.find('\n');
+              if (sep == std::string::npos) return;  // safety
+
+              std::string ui_line = states_line.substr(0, sep);
+              std::string robot_line = states_line.substr(sep + 1);
+
+              static const char* prefix_ui = "Current UI State is: ";
+              static const char* prefix_robot = "Current Robot State is: ";
+
+              // Extract UI state
+              if (ui_line.find(prefix_ui) == 0) {
+                  std::string ui_state = ui_line.substr(strlen(prefix_ui));
+                  trim(ui_state);
+                  id(uiState).publish_state(ui_state.c_str());
               }
-            }
+
+              // Extract Robot state
+              if (robot_line.find(prefix_robot) == 0) {
+                  std::string robot_state = robot_line.substr(strlen(prefix_robot));
+                  trim(robot_state);
+                  id(robotState).publish_state(robot_state.c_str());
+              }
           }
+
+
           else if (command == "GetUserSettings") {
             for (auto &line : lines) {
               trim(line);
@@ -260,14 +346,20 @@ uart:
             }
           }
 
+          else {
+              id(uiState).publish_state(command.c_str());
+          }
+
 
 
           // ---- OPTIONAL: print each line for debugging ----
-          //for (auto &line : lines) {
-            //std::vector<uint8_t> v(line.begin(), line.end());
-            //UARTDebug::log_string(direction, v);
-            //ESP_LOGI("uart_parser", "LINE: %s", line.c_str());
-          //}
+          for (auto &line : lines) {
+            std::vector<uint8_t> v(line.begin(), line.end());
+            UARTDebug::log_string(direction, v);
+            ESP_LOGI("uart_parser", "LINE: %s", line.c_str());
+          }
+
+
 
 
 
@@ -313,29 +405,40 @@ sensor:
     name: "Filter Change Time"
     id: filterChangeTime
     unit_of_measurement: "s"
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Brush Change Time"
     id: brushChangeTime
     unit_of_measurement: "s"
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Dirt Bin Alert Reminder"
     id: dirtBinAlertReminder
     unit_of_measurement: "min"
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Current Dirt Bin Runtime"
     id: currentDirtBinRuntime
     unit_of_measurement: "s"
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Number of Full Dust Bin Cleanings"
     id: numberDustBinFull
     unit_of_measurement: "count"
+    entity_category: "diagnostic"
 
 
 binary_sensor:
+  # --- GetErr ---
+  - platform: template
+    id: usbConnected
+    name: "USB Connected"
+    entity_category: "diagnostic"
+
   # --- GetCharger ---
   - platform: template
     id: chargerBatteryOverTemp
@@ -384,6 +487,7 @@ binary_sensor:
 
 
 text_sensor:
+  # --- GetErr ---
   - platform: template
     id: robotError
     name: "Robot Error"
@@ -425,13 +529,18 @@ text_sensor:
 
   # --- GetState ---
   - platform: template
-    name: "Current State"
-    id: currentState
-  
+    name: "UI State"
+    id: uiState
+
+  - platform: template
+    name: "Robot State"
+    id: robotState
+
   # --- GetUserSettings ---
   - platform: template
     name: "Language"
     id: language
+    entity_category: "diagnostic"
 
 
 switch:
@@ -447,6 +556,7 @@ switch:
       - uart.write: "TestMode Off \n"
       - delay: 100ms
       - uart.write: "TestMode \n"
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Click sounds"
@@ -458,6 +568,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings ButtonClick OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "LED"
@@ -469,6 +580,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings StealthLED OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   # - platform: template
   #   name: "Wall Enable"
@@ -493,6 +605,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings EcoMode OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "IntenseClean"
@@ -504,6 +617,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings IntenseClean OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "WiFi"
@@ -515,6 +629,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings WiFi OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Melody Sounds"
@@ -526,6 +641,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings Melodies OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Warning Sounds"
@@ -537,6 +653,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings Warnings OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Bin Full Detect"
@@ -548,6 +665,7 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings BinFullDetect OFF \n"
       - script.execute: get_user_settings
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Schedule"
@@ -559,33 +677,57 @@ switch:
     turn_off_action:
       - uart.write: "SetUserSettings Schedule OFF \n"
       - script.execute: get_user_settings
-
+    entity_category: "diagnostic"
 
 button:
   - platform: template
     name: "House Clean"
+    icon: mdi:home
     on_press:
       - uart.write: "Clean \n"
 
   - platform: template
     name: "Spot Clean"
+    icon: mdi:target
     on_press:
       - uart.write: "Clean Spot \n"
 
   - platform: template
-    name: "Pause Cleaning"
+    name: "Stop Cleaning"
+    icon: mdi:stop
     on_press:
       - uart.write: "Clean Stop \n"
+      - delay: 100ms
+      - script.execute: powercycle 
 
   - platform: template
     name: "Locate Robot"
+    icon: mdi:volume-high
     on_press:
       - uart.write: "PlaySound SoundId 20 \n"  
 
   - platform: template
     name: "Update status"
-    entity_category: "diagnostic"
+    icon: mdi:refresh
     on_press:
       - script.execute: get_all_data 
+    entity_category: "diagnostic"
 
+  - platform: template
+    name: "Shutdown"
+    icon: mdi:power
+    on_press:
+      - script.execute: robotShutdown 
+    entity_category: "diagnostic"
+
+  - platform: template
+    name: "PowerCycle"
+    icon: mdi:restart
+    on_press:
+      - script.execute: powercycle 
+    entity_category: "diagnostic"
+
+  - platform: restart
+    name: Reboot ESP
+    
 
