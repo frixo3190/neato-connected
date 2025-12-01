@@ -4,7 +4,7 @@ cards:
     variables:
       robot_id: REPLACE_WITH_DEVICE_ID
     icon: mdi:robot-vacuum-variant
-    entity: '[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]'
+    entity: "[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]"
     size: 50%
     color_type: icon
     tap_action:
@@ -50,15 +50,16 @@ cards:
           - font-weight: bold
           - animation: |
               [[[ 
-                return states[`binary_sensor.${variables.robot_id}_charging_active`]?.state === 'on'
-                  ? 'pulseGreen 3s infinite'
-                  : '';
+                if (states[`binary_sensor.${variables.robot_id}_charging_active`]?.state === 'on') return '';
+                const pct = Number(states[`sensor.${variables.robot_id}_fuel_percent`]?.state);
+                return pct > 35 ? 'pulseGreen 3s infinite' : 'pulseOrange 3s infinite';
               ]]]
           - background-color: |
               [[[ 
                 const pct = Number(states[`sensor.${variables.robot_id}_fuel_percent`]?.state);
-                return pct > 35 ? 'green' : '#FFBF00';
+                return pct > 35 ? 'rgb(124, 252, 0)' : 'rgb(255, 140, 0)';
               ]]]
+          - color: black
         dock:
           - position: absolute
           - top: 8px
@@ -73,7 +74,7 @@ cards:
                   : 'none';
               ]]]
     custom_fields:
-      battery: >-
+      battery: |-
         [[[ 
           const v = states[`sensor.${variables.robot_id}_fuel_percent`]?.state;
           return (v ?? '0') + '%';
@@ -88,11 +89,15 @@ cards:
         ]]]
     extra_styles: |
       @keyframes pulseGreen {
-        0%   { box-shadow: 0 0 5px 0 rgba(0,255,0,0.6); }
-        50%  { box-shadow: 0 0 20px 6px rgba(0,255,0,1); }
-        100% { box-shadow: 0 0 5px 0 rgba(0,255,0,0.6); }
+        0%   { box-shadow: 0 0 5px 0    rgba(124, 252, 0, 0.6); }
+        50%  { box-shadow: 0 0 20px 6px rgba(124, 252, 0, 1.0); }
+        100% { box-shadow: 0 0 5px 0    rgba(124, 252, 0, 0.6); }
       }
-
+      @keyframes pulseOrange {
+        0%   { box-shadow: 0 0 5px 0    rgba(255, 140, 0, 0.6); }
+        50%  { box-shadow: 0 0 20px 6px rgba(255, 140, 0, 1.0); }
+        100% { box-shadow: 0 0 5px 0    rgba(255, 140, 0, 0.6); }
+      }
   - type: vertical-stack
     cards:
       - type: horizontal-stack
@@ -101,7 +106,7 @@ cards:
             variables:
               robot_id: REPLACE_WITH_DEVICE_ID
             show_icon: false
-            entity: '[[[ return `sensor.${variables.robot_id}_robot_alert`; ]]]'
+            entity: "[[[ return `sensor.${variables.robot_id}_robot_alert`; ]]]"
             show_state: false
             styles:
               card:
@@ -117,12 +122,11 @@ cards:
                 try { return alert.match(/\(UI_(ERROR|ALERT)_(.+)\)/)[2].replaceAll('_',' '); }
                 catch { return alert; }
               ]]]
-
           - type: custom:button-card
             variables:
               robot_id: REPLACE_WITH_DEVICE_ID
             show_icon: false
-            entity: '[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]'
+            entity: "[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]"
             show_state: false
             styles:
               card:
@@ -138,34 +142,33 @@ cards:
                 try { return err.match(/\(UI_(ERROR|ALERT)_(.+)\)/)[2].replaceAll('_',' '); }
                 catch { return err; }
               ]]]
-
   - type: horizontal-stack
     cards:
       - type: custom:button-card
         variables:
           robot_id: REPLACE_WITH_DEVICE_ID
-        entity: '[[[ return `button.${variables.robot_id}_house_clean`; ]]]'
+        entity: "[[[ return `button.${variables.robot_id}_house_clean`; ]]]"
         name: Clean
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
           robot_id: REPLACE_WITH_DEVICE_ID
-        entity: '[[[ return `button.${variables.robot_id}_spot_clean`; ]]]'
+        entity: "[[[ return `button.${variables.robot_id}_spot_clean`; ]]]"
         name: Spot Clean
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
           robot_id: REPLACE_WITH_DEVICE_ID
-        entity: '[[[ return `button.${variables.robot_id}_stop_cleaning`; ]]]'
+        entity: "[[[ return `button.${variables.robot_id}_stop_cleaning`; ]]]"
         name: STOP
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
           robot_id: REPLACE_WITH_DEVICE_ID
-        entity: '[[[ return `button.${variables.robot_id}_locate_robot`; ]]]'
+        entity: "[[[ return `button.${variables.robot_id}_locate_robot`; ]]]"
         name: Locate
         tap_action:
           action: toggle
@@ -188,72 +191,107 @@ cards:
                     cards:
                       - show_name: true
                         show_icon: true
-                        entity: '[[[ return `switch.${variables.robot_id}_eco_mode`; ]]]'
+                        entity: >-
+                          [[[ return `switch.${variables.robot_id}_eco_mode`;
+                          ]]]
                         name: ECO Mode
                         type: button
                       - show_name: true
                         show_icon: true
-                        entity: '[[[ return `switch.${variables.robot_id}_test_mode`; ]]]'
+                        entity: >-
+                          [[[ return `switch.${variables.robot_id}_test_mode`;
+                          ]]]
                         name: Test Mode
                         type: button
-                      - entity: '[[[ return `button.${variables.robot_id}_update_status`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `button.${variables.robot_id}_update_status`; ]]]
                         name: Fetch status
                         show_icon: true
                         type: button
                         tap_action:
                           action: toggle
-                      - entity: '[[[ return `binary_sensor.${variables.robot_id}_usb_connected`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `binary_sensor.${variables.robot_id}_usb_connected`;
+                          ]]]
                         name: USB
                         show_icon: true
                         type: button
                   - type: entities
                     entities:
-                      - entity: '[[[ return `switch.${variables.robot_id}_intenseclean`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `switch.${variables.robot_id}_intenseclean`; ]]]
                         name: Intense Clean
-                      - entity: '[[[ return `switch.${variables.robot_id}_led`; ]]]'
+                      - entity: "[[[ return `switch.${variables.robot_id}_led`; ]]]"
                         name: LED
-                      - entity: '[[[ return `switch.${variables.robot_id}_wifi`; ]]]'
+                      - entity: "[[[ return `switch.${variables.robot_id}_wifi`; ]]]"
                         name: WiFi
-                      - entity: '[[[ return `switch.${variables.robot_id}_melody_sounds`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `switch.${variables.robot_id}_melody_sounds`; ]]]
                         name: Melody Sounds
-                      - entity: '[[[ return `switch.${variables.robot_id}_warning_sounds`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `switch.${variables.robot_id}_warning_sounds`; ]]]
                         name: Warning Sounds
-                      - entity: '[[[ return `switch.${variables.robot_id}_click_sounds`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `switch.${variables.robot_id}_click_sounds`; ]]]
                         name: Click Sounds
-                      - entity: '[[[ return `switch.${variables.robot_id}_bin_full_detect`; ]]]'
+                      - entity: >-
+                          [[[ return
+                          `switch.${variables.robot_id}_bin_full_detect`; ]]]
                         name: Bin Full Detect
-                      - entity: '[[[ return `switch.${variables.robot_id}_schedule`; ]]]'
+                      - entity: >-
+                          [[[ return `switch.${variables.robot_id}_schedule`;
+                          ]]]
                         name: Schedule
                     state_color: false
                     show_header_toggle: false
                   - type: entities
                     entities:
-                      - entity: '[[[ return `sensor.${variables.robot_id}_model`;]]]'
+                      - entity: "[[[ return `sensor.${variables.robot_id}_model`;]]]"
                         name: Model
-                      - entity: '[[[ return `sensor.${variables.robot_id}_serial_number`;]]]'
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_serial_number`;]]]
                         name: S/N
-                      - entity: '[[[ return `sensor.${variables.robot_id}_time_local`;]]]'
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_time_local`;]]]
                         name: Robot Time
-                      - entity: '[[[ return `sensor.${variables.robot_id}_voltage_v`;]]]'
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_battery_voltage_v`;]]]
                         name: Battery Voltage
-                      - entity: '[[[ return `sensor.${variables.robot_id}_battery_temp_c_avg`;]]]'
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_battery_temp_c_avg`;]]]
                         name: Battery Temp (avg)
-                      - entity: '[[[ return `sensor.${variables.robot_id}_charger_mah`;]]]'
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_charger_mah`;]]]
                         name: Charging
-                      - entity: '[[[ return `sensor.${variables.robot_id}_discharge_mah`;]]]'
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_discharge_mah`;]]]
                         name: Discharging
                   - type: horizontal-stack
                     cards:
                       - show_name: true
                         show_icon: true
-                        entity: '[[[ return `button.${variables.robot_id}_shutdown`;]]]'
+                        entity: "[[[ return `button.${variables.robot_id}_shutdown`;]]]"
                         type: button
                         name: Power Off
                         tap_action:
                           action: toggle
                       - show_name: true
                         show_icon: true
-                        entity: '[[[ return `button.${variables.robot_id}_powercycle`;]]]'
+                        entity: >-
+                          [[[ return
+                          `button.${variables.robot_id}_powercycle`;]]]
                         name: Reboot Robot
                         type: button
                         tap_action:
@@ -261,7 +299,9 @@ cards:
                       - show_name: true
                         show_icon: true
                         type: button
-                        entity: '[[[ return `button.${variables.robot_id}_reboot_esp`;]]]'
+                        entity: >-
+                          [[[ return
+                          `button.${variables.robot_id}_reboot_esp`;]]]
                         name: Reboot ESP
                         tap_action:
                           action: toggle
