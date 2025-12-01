@@ -1,5 +1,44 @@
 # neato-connected
 
+# WARNING - this branch is for work in progress text! please go to the main branch!
+
+### What is this?
+
+Repair your Neato Robot Vacuum to be controlled via home assistant after the shutdown of the Neato servers. The scope of this project is to give your robot at least the same functionallity as when you bought it, however as the project is in a development state, the current functionalities include:
+- Viewing status
+- Start & stop cleaning
+- Editing settings (even some hidden settings!)
+- Scheduling via an home assistant automation/script
+
+The ability to create, view and edit floormaps so the robot can get the same functionallity with nogo-lines and zones is in the making.
+
+Main card | Settings View
+:-------------------------:|:-------------------------:
+![ha-card](./pics/esphome/ha-card.png) |  ![ha-card-settings](./pics/esphome/ha-card-settings.png)
+
+
+**I would like to support all robots where an debug interface, or other controls, is accessible, but since I only have a D3, I can only test on that one. If you have another robot, please open an discussion so we can verify that it works or add support for it!**
+
+As far as I know, only the D3, D4, D5, D7 and D7 has the firmware `4.5.3` and currenly the config is based on that so the robots that should work with that firmware is as follows:
+- Confirmed working: **D3**
+- Should work, need confirmation: **D4, D5, D6, D7** 
+
+**Trickier robots**
+- D8 (probably D9, D10) - These robots use a compleatly different board, chip and firmware, and because the debug interface seams to be behind a password lock, this cannot be controlled directly.
+
+#### How-to connect
+Sadly to be able to repair your neato vacuum you **need to access an USB port or debug pins** to be able to connect to the debug interface. The current methods are:
+
+Drill a hole in the bumper to access the debug port | Open the robot and solder wires to the debug pins
+:-------------------------:|:-------------------------:
+![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) |  ![pcb](./pics/d3/pcb-top-annotated.png)
+
+I understand these methods are hard or destructive, I am currently investigating the possibility of accessing the debug interface using less extreme methods, however so far I have come up empty handed.
+
+
+
+
+
 Current status; Esphome that I feel is fully functionally, a detailed guide and a config generator based on the device name I want to have ready by friday. I have updated my robot back to firmware `4.5.3` and with process found a lot of things, was able to get the main robot file for the old version and have found alot of hidden commands. The current esphome.yaml and ha-dashboard.yaml files work, just replace `espcam_test_sensor` with the id of your espdevice. I will make this easier to understand and use when I publish it fully. The pictures & other stuff also needs to be updated, working on this too!
 
 This project aims to repair the neato vacuum cleaners so they function on at least the same level as when you bought it. Currently this project is very soon in an initial MVP stage, you can start, stop cleanings, spot clean (even give an size of an area) and see general status of the robot via en esphome config over the serial debug interface. The best method to access this serial debug interface I will need to investiate, but I would say it is to drill a hole in the bumper. My hope is to make this project bigger, use ROS2 with slam_toolbox to get the floormaps. If this is a success, it will not only have no-go lines, but also zone cleaning, spot clean by selecting on the floormap and allowing more fine tune controls of the vacuum and brushspeed. The extended functionallity with floormap would need to "TestMode" to work wihtout it complaining, need to verify exactly that it will allow us to do all of this!
