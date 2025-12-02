@@ -1,16 +1,28 @@
+# CHANGE THIS BASED ON YOUR BOARD!
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+##################################
+
 esphome:
-  name: espcam-test-sensor
-  friendly_name: espcam-test-sensor
+  name: espcam-test-sensor              # If you want another name, change it here, remeber to replace it in the ha-card.yaml!
+
+#   Combatability between esphome config and this card is ensured as long as the
+#   major version's match, for relase candicates, betas etc (indicated by X.X-a/b/rc.X), the version
+#   has to match perfectly otherwise compatability is not promised. 
+#
+#   Please try to keep the versions the same, and check the github for updates!
+  project: 
+    name: philip2809.neato-connected
+    version: 1.0-b.2
 
   on_boot:
     - priority: 600
       then:
         - lambda: 'id(uiState).publish_state("Starting...");'
 
-esp32:
-  board: esp32dev
-  framework:
-    type: esp-idf
+
 
 script:
   - id: get_user_settings
@@ -79,10 +91,6 @@ api:
   encryption:
     key: !!!!!YOUR KEY HERE!!!!!!
 
-  project:
-    name: philip2809.neato-connected
-    version: "0.1.0"
-
   actions:
     - action: send_cmd
       variables:
@@ -116,7 +124,7 @@ logger:
 uart:
   id: uart_bus
   baud_rate: 115200
-  tx_pin: GPIO1
+  tx_pin: GPIO12
   rx_pin: GPIO13
   rx_buffer_size: 65535
   debug:
@@ -688,8 +696,6 @@ button:
     name: "House Clean"
     icon: mdi:home
     on_press:
-      - uart.write: "PlaySound soundid 1 \n"
-      - delay: 100ms
       - uart.write: "Clean \n"
 
   - platform: template
@@ -726,16 +732,23 @@ button:
       # Set SetUIError dance makes sure the robot realizes it is in the "Paused" state, otherwise it will keep reporting "Running" until you restart or press the button
       - uart.write: "Clean Stop \n"
       - delay: 50ms
-      - uart.write: "SetUIError setalert UI_ALERT_INFO_THANK_YOU \n"
+      - uart.write: "SetUIError setalert UI_ALERT_OLD_ERROR \n"
       - delay: 50ms
-      - uart.write: "SetUIError clearalert UI_ALERT_INFO_THANK_YOU \n"
-      - script.execute: powercycle 
+      - uart.write: "SetUIError clearalert UI_ALERT_OLD_ERROR \n"
 
   - platform: template
     name: "Resume Cleaning"
     icon: mdi:play
     on_press:
-      - uart.write: "Clean \n"
+      - uart.write: !lambda |-
+            // If we are in house cleaning, to resume just send clean, if we are in spot cleaning we append spot
+            std::string state = id(uiState).state;
+            std::string cmd = "Clean";
+
+            if (state == "UIMGR_STATE_SPOTCLEANINGPAUSED") cmd += " Spot";
+
+            cmd += " \n";
+            return std::vector<uint8_t>(cmd.begin(), cmd.end());
 
   - platform: template
     name: "Locate Robot"
