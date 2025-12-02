@@ -2,6 +2,10 @@ The boot sequence differs on the Neato D8 (and presumably D9 / D10).
 
 Shutdown sequence:
 
+The boot sequence differs on the Neato D8 (and presumably D9 / D10).
+
+Shutdown sequence:
+
 Neato LEGO Distro Release 1.7.0-2933_10060147_cfae4f98 Neato-Robot ttymxc1
 
 Neato-Robot login:
