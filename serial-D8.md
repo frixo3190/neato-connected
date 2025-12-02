@@ -2,61 +2,56 @@ The boot sequence differs on the Neato D8 (and presumably D9 / D10).
 
 Shutdown sequence:
 
-The boot sequence differs on the Neato D8 (and presumably D9 / D10).
-
-Shutdown sequence:
-
 Neato LEGO Distro Release 1.7.0-2933_10060147_cfae4f98 Neato-Robot ttymxc1
 
-Neato-Robot login:
-[[1B][0;32m  OK  [1B][0m] Removed slice [1B][0;1;39msystem-getty.slice[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mBluetooth[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mMulti-User System[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mLogin Prompts[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mHost and Network Name Lookups[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSound Card[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSystem Time Synchronized[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSystem Time Set[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mTimers[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mDaily Cleanup of Temporary Directories[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Closed [1B][0;1;39mLoad/Save RF Kill Switch Status /dev/rfkill Watch[1B][0m.
-         Stopping [1B][0;1;39mSave/Restore Sound Card State[1B][0m...
-         Stopping [1B][0;1;39mAuto-update Service[1B][0m...
-         Stopping [1B][0;1;39mD-Bus System Message Bus[1B][0m...
-         Stopping [1B][0;1;39mCheck and fix Bluetooth function periodically[1B][0m...
-         Stopping [1B][0;1;39mFlush file cache[1B][0m...
-         Stopping [1B][0;1;39mPython OTA Upgrade Service[1B][0m...
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPlay 1 second silence file[1B][0m.
-         Stopping [1B][0;1;39mR         Stopping [1B][0;1;39mSerial Getty on ttymxc1[1B][0m...
-         Stopping [1B][0;1;39mLogin Service[1B][0m...
-         Stopping [1B][0;1;39mLoad/Save Random Seed[1B][0m...
-         Stopping [1B][0;1;39mTEE Supplicant[1B][0m...
-         Stopping [1B][0;1;39mUSB gadgets[1B][0m...
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mAuto-update Service[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mD-Bus System Message Bus[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mTEE Supplicant[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mFlush file cache[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mLogin Service[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mCheck and fix Bluetooth function periodically[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mUSB gadgets[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mTron Connectivity[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mSerial Getty on ttymxc1[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mSave/Restore Sound Card State[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mLoad/Save Random Seed[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mBluetooth service[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Removed slice [1B][0;1;39msystem-serial\x2dgetty.slice[1B][0m.
-         Stopping [1B][0;1;39mPython User Event Scheduler Service[1B][0m...
-         Stopping [1B][0;1;39mPermit User Sessions[1B][0m...
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPython User Event Scheduler Service[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPython OTA Upgrade Service[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPermit User Sessions[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mNetwork[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mRemote File Systems[1B][0m.
-         Stopping [1B][0;1;39mBattery and Charger Control Service[1B][0m...
-         Stopping [1B][0;1;39mNetwork Name Resolution[1B][0m...
-[00][00]NOTICE:  BL31: v2.2(release):rel_imx_5.4.47_2.2.0-0-gc949a888e-dirty
-NOTICE:  BL31: Built : 08:42:51, Nov  3 2021
-
+Neato-Robot login:  
+[[1B][0;32m  OK  [1B][0m] Removed slice [1B][0;1;39msystem-getty.slice[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mBluetooth[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mMulti-User System[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mLogin Prompts[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mHost and Network Name Lookups[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSound Card[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSystem Time Synchronized[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSystem Time Set[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mTimers[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mDaily Cleanup of Temporary Directories[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Closed [1B][0;1;39mLoad/Save RF Kill Switch Status /dev/rfkill Watch[1B][0m.  
+         Stopping [1B][0;1;39mSave/Restore Sound Card State[1B][0m...  
+         Stopping [1B][0;1;39mAuto-update Service[1B][0m...  
+         Stopping [1B][0;1;39mD-Bus System Message Bus[1B][0m...  
+         Stopping [1B][0;1;39mCheck and fix Bluetooth function periodically[1B][0m...  
+         Stopping [1B][0;1;39mFlush file cache[1B][0m...  
+         Stopping [1B][0;1;39mPython OTA Upgrade Service[1B][0m...  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPlay 1 second silence file[1B][0m.  
+         Stopping [1B][0;1;39mR         Stopping [1B][0;1;39mSerial Getty on ttymxc1[1B][0m...  
+         Stopping [1B][0;1;39mLogin Service[1B][0m...  
+         Stopping [1B][0;1;39mLoad/Save Random Seed[1B][0m...  
+         Stopping [1B][0;1;39mTEE Supplicant[1B][0m...  
+         Stopping [1B][0;1;39mUSB gadgets[1B][0m...  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mAuto-update Service[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mD-Bus System Message Bus[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mTEE Supplicant[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mFlush file cache[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mLogin Service[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mCheck and fix Bluetooth function periodically[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mUSB gadgets[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mTron Connectivity[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mSerial Getty on ttymxc1[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mSave/Restore Sound Card State[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mLoad/Save Random Seed[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mBluetooth service[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Removed slice [1B][0;1;39msystem-serial\x2dgetty.slice[1B][0m.  
+         Stopping [1B][0;1;39mPython User Event Scheduler Service[1B][0m...  
+         Stopping [1B][0;1;39mPermit User Sessions[1B][0m...  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPython User Event Scheduler Service[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPython OTA Upgrade Service[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mPermit User Sessions[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mNetwork[1B][0m.  
+[[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mRemote File Systems[1B][0m.  
+         Stopping [1B][0;1;39mBattery and Charger Control Service[1B][0m...  
+         Stopping [1B][0;1;39mNetwork Name Resolution[1B][0m...  
+[00][00]NOTICE:  BL31: v2.2(release):rel_imx_5.4.47_2.2.0-0-gc949a888e-dirty  
+NOTICE:  BL31: Built : 08:42:51, Nov  3 2021  
 
 Boot Sequence:
 
