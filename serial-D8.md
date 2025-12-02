@@ -57,7 +57,7 @@ Boot Sequence:
 
 Welcome to [1B][1mNXP i.MX Release Distro 5.4-zeus (zeus)[1B][0m!
 
-[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mDispatch Password â€¦ts to Console Directory Watch[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mDispatch Password …ts to Console Directory Watch[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Reached target [1B][0;1;39mPaths[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Reached target [1B][0;1;39mSlices[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Reached target [1B][0;1;39mSwap[1B][0m.
@@ -131,7 +131,7 @@ Welcome to [1B][1mNXP i.MX Release Distro 5.4-zeus (zeus)[1B][0m!
 [[1B][0;32m  OK  [1B][0m] Closed [1B][0;1;39mProcess Core Dump Socket[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mBasic System[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mPaths[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mDispatch Password â€¦ts to Console Directory Watch[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mDispatch Password …ts to Console Directory Watch[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSlices[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSockets[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Closed [1B][0;1;39mD-Bus System Message Bus Socket[1B][0m.
@@ -167,8 +167,8 @@ Welcome to [1B][1mNXP i.MX Release Distro 5.4-zeus (zeus)[1B][0m!
 [[1B][0;32m  OK  [1B][0m] Created slice [1B][0;1;39msystem-systemd\x2dfsck.slice[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Created slice [1B][0;1;39msystem-wpa_supplicant.slice[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Created slice [1B][0;1;39mUser and Session Slice[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mDispatch Password â€¦ts to Console Directory Watch[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mForward Password Râ€¦uests to Wall Directory Watch[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mDispatch Password …ts to Console Directory Watch[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mForward Password R…uests to Wall Directory Watch[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mSwitch Root[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mInitrd File Systems[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Stopped target [1B][0;1;39mInitrd Root File System[1B][0m.
@@ -181,13 +181,13 @@ Welcome to [1B][1mNXP i.MX Release Distro 5.4-zeus (zeus)[1B][0m!
 [[1B][0;32m  OK  [1B][0m] Listening on [1B][0;1;39mNetwork Service Netlink Socket[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Listening on [1B][0;1;39mudev Control Socket[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Listening on [1B][0;1;39mudev Kernel Socket[1B][0m.
-         Starting [1B][0;1;39mCreate list of stâ€¦odes for the current kernel[1B][0m...
+         Starting [1B][0;1;39mCreate list of st…odes for the current kernel[1B][0m...
 [[1B][0;32m  OK  [1B][0m] Stopped [1B][0;1;39mJournal Service[1B][0m.
          Starting [1B][0;1;39mJournal Service[1B][0m...
          Starting [1B][0;1;39mLoad Kernel Modules[1B][0m...
          Starting [1B][0;1;39mRemount Root and Kernel File Systems[1B][0m...
          Starting [1B][0;1;39mudev Coldplug all Devices[1B][0m...
-[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mCreate list of staâ€¦ nodes for the current kernel[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mCreate list of sta… nodes for the current kernel[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mJournal Service[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mRemount Root and Kernel File Systems[1B][0m.
          Starting [1B][0;1;39mLoad/Save Random Seed[1B][0m...
@@ -262,7 +262,7 @@ Welcome to [1B][1mNXP i.MX Release Distro 5.4-zeus (zeus)[1B][0m!
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mHostname Service[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mSetup dev permission[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mLDS Driver Service[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Listening on [1B][0;1;39mLoad/Save RF â€¦itch Status /dev/rfkill Watch[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Listening on [1B][0;1;39mLoad/Save RF …itch Status /dev/rfkill Watch[1B][0m.
          Starting [1B][0;1;39mLoad/Save RF Kill Switch Status[1B][0m...
          Starting [1B][0;1;39mSave/Restore Sound Card State[1B][0m...
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mLoad/Save RF Kill Switch Status[1B][0m.
@@ -271,7 +271,7 @@ Welcome to [1B][1mNXP i.MX Release Distro 5.4-zeus (zeus)[1B][0m!
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mSave/Restore Sound Card State[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Found device [1B][0;1;39m/sys/subsystem/net/devices/wlan0[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Reached target [1B][0;1;39mSound Card[1B][0m.
-[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mWPA supplicant daeâ€¦ (interface-specific version)[1B][0m.
+[[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mWPA supplicant dae… (interface-specific version)[1B][0m.
 [[1B][0;32m  OK  [1B][0m] Reached target [1B][0;1;39mNetwork[1B][0m.
          Starting [1B][0;1;39mPermit User Sessions[1B][0m...
 [[1B][0;32m  OK  [1B][0m] Started [1B][0;1;39mPermit User Sessions[1B][0m.
