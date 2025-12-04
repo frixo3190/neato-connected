@@ -20,8 +20,10 @@ Main card | Settings View
 **I would like to support all robots where an debug interface, or other controls, is accessible, but since I only have a D3, I can only test on that one. If you have another robot, please open an discussion so we can verify that it works or add support for it!**
 
 As far as I know, only the D3, D4, D5, D7 and D7 has the firmware `4.5.3` and currenly the config is based on that so the robots that should work with that firmware is as follows:
-- Confirmed working: **D3**
-- Should work, need confirmation: **D4, D5, D6, D7** 
+- Confirmed working: **D3, D5, D7**
+- Should work, need confirmation: **D4, D6** 
+
+If you have another Neato robot, please open an issue here on github so we can add support for it, however we might need your help to know what needs to change!
 
 **Trickier robots**
 - D8 (probably D9, D10) - These robots use a compleatly different board, chip and firmware, and because the debug interface seams to be behind a password lock, this cannot be controlled directly.
@@ -29,66 +31,36 @@ As far as I know, only the D3, D4, D5, D7 and D7 has the firmware `4.5.3` and cu
 #### How-to connect
 Sadly to be able to repair your neato vacuum you **need to access an USB port or debug pins** to be able to connect to the debug interface. The current methods are:
 
-Drill a hole in the bumper to access the debug port | Open the robot and solder wires to the debug pins
+Drill a hole in the bumper to access the debug port | Open the robot and bend pins or solder to debug connector
 :-------------------------:|:-------------------------:
-![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) |  ![pcb](./pics/d3/pcb-top-annotated.png)
+![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) |  ![d7-install](./pics/installs/d7-install-serial.png) ![d7-install-esp](./pics/installs/d7-install-esp.png)
 
 I understand these methods are hard or destructive, I am currently investigating the possibility of accessing the debug interface using less extreme methods, however so far I have come up empty handed.
 
+### Getting started!
+
+First of all you should start thinking about how you want to keep your robot connected, but if you don't want to commit to opening or drilling an hole in the bumper yet, you can always take the bumper off and connect an esp device to the robot and just run it via Home Assistant. If you don't have an Home Assistant installation you can try to control it via the [web server interface](./ha-images.md#webserver-interface).
+
+TODO:
+1. setup hacs
+    1. esphome
+    2. browser-mod
+    3. button-card
+2. Esphome config, build for your device
+    - set keys correctly, etc
+3. Ha card, set entityid to the same
+4. DONE, control your vacuum via HA!
 
 
+### Acknowledgements
+
+- @Fabian Ullrich, Jiska Classen, Johannes Eger and Matthias Hollick from Secure Mobile Networking Lab
+    - [Security and Privacy for IoT Ecosystems](https://tuprints.ulb.tu-darmstadt.de/handle/tuda/4937)
+    - [Vacuums in the Cloud:
+Analyzing Security in a Hardened IoT Ecosystem](https://www.usenix.org/system/files/woot19-paper_ullrich.pdf)
+    - And all of their work on these robots, including talks etc!
+- [@jeroenterheerdt](https://github.com/jeroenterheerdt) for testing, reviewing and the original [neato-serial](https://github.com/jeroenterheerdt/neato-serial)
+- [@algaen](https://github.com/algaen) for the info about the D8 (D9, D10?) robots
+- [@tomwj](https://github.com/tomwj) for testing and pictures installing it internally in a D7
 
 
-Current status; Esphome that I feel is fully functionally, a detailed guide and a config generator based on the device name I want to have ready by friday. I have updated my robot back to firmware `4.5.3` and with process found a lot of things, was able to get the main robot file for the old version and have found alot of hidden commands. The current esphome.yaml and ha-dashboard.yaml files work, just replace `espcam_test_sensor` with the id of your espdevice. I will make this easier to understand and use when I publish it fully. The pictures & other stuff also needs to be updated, working on this too!
-
-This project aims to repair the neato vacuum cleaners so they function on at least the same level as when you bought it. Currently this project is very soon in an initial MVP stage, you can start, stop cleanings, spot clean (even give an size of an area) and see general status of the robot via en esphome config over the serial debug interface. The best method to access this serial debug interface I will need to investiate, but I would say it is to drill a hole in the bumper. My hope is to make this project bigger, use ROS2 with slam_toolbox to get the floormaps. If this is a success, it will not only have no-go lines, but also zone cleaning, spot clean by selecting on the floormap and allowing more fine tune controls of the vacuum and brushspeed. The extended functionallity with floormap would need to "TestMode" to work wihtout it complaining, need to verify exactly that it will allow us to do all of this!
-
-**The published [esphome.yaml](./esphome.yaml) should work and can be tested by anyone who desires, however I will not call the esphome MVP finalized until I have tested with the latest firmware and made some minimal ui setup with nice icons etc**
-
-My findings about the Neato D3 Connected, however should be same/very similar for any Neato connected robot.
-
-I found an old Neato D3 that was broken, the left wheel didn't spin so I opened it up and realized the black cable for the left motor was not connected, it had ripped out of the JST connector. I ordered some new JST connectors since I didn't have any and because I didn't have the correct crimp I soldered an already crimped cable that I got with the set to the cable and connected it to a new JST connector. One connected back to the board it worked perfectly, ran a couple of cleanings in my apartment and it works very well, the left wheels gears is starting to wear off so I am thinking of 3d printing some new ones.
-
-When I got the robot I had firmware `4.5.3_189`, while playing around with it I reset it to factory, so I will need to upgrade it later on, however at the time of writing I don't have an USB OTG cable. Since you always can upgrade to `4.5.3_189` I will be basing this project of that version, and that is that all commands etc will be using unless otherwise noted. The factory firmware on my robot is version `3.2.0_305` and would the other other version I will mention from time to time.
-
-Here is the different firmware images availible:
-https://github.com/RobertSundling/neato-botvac
-
-I will be trying to upgrade using the self-signed certificate with a custom date, but I will probably also make a fake ntp server into this project so that you can install using the original certificate.
-
-Lets clearify a quick thing, I think this is obvious to many, but since I myself got confused lets write it down. The front of the robot is where the bumper is, back is where the charger and excuaset is. If we look at the robot from a top down view seeing in the way that the robot is going to drive forward, the right side is where the button and blinky lights are. Left is the other side.
-
-Once the bot was working, my journey began. I have split up the different parts into different documents, find them below:
-- [Setup network](./setup-network.md)
-- [Serial interface](./serial.md)
-
-[ldar-poc](./lidar-poc/) includes a small lidar proof of concept to get the lidar-data and show it. [Generated by an LLM]
-
-## Serial connection via ESPHOME
-The suspected 3.3v pin is 3.3v and I have been able to keep an esp32cam connected and running the configuration at [esphome.yaml](./esphome.yaml)
-
-The script is currently up to date and should be used on a robot with firmware `4.5.3` 
-
-Currently this is mainly a POC but I am working on making it an fully working controller for the robot. Currently the lamdba function is probably still very inefficient and needs cleanup after the LLM changed it.
-
-Look at [debug port connection](debug-port-connection.md) on how I drilled a hole to access the debug port, for this you don't even need to open the device.
-
-Stated to experiment with commands if it is possible to get the floormap stuff [experimentations](./command-experiments.md)
-The UserSettings thing is a little wierd for me, even when I toggle them, they don't always change, not sure if that is because the battery is low for me or the firmware version, but it seams to respect most of them except for WiFi, it still advertises it's AP when it is off, but coud be the older firmware! It also seams that changes take effect after an reboot, but this also needs more investigating!
-
-Currently a work in progress, currently it looks like this:
-
-Main card | Settings View
-:-------------------------:|:-------------------------:
-![ha-card](./pics/esphome/ha-card.png) |  ![ha-card-settings](./pics/esphome/ha-card-settings.png)
-
-I will add more pictures and a full demo on the full release of how it looks etc.
-
-Not everything is done yet, and of course I am very welcome to feedback! There is some slight quirks with the serial debug port, at least on the firmware `3.2.0` (I will soon have my OTG cable so I can test on the latest). If I stop a cleaning with `Clean Stop` the robot goes into a "Stop" state and it is a little tricky to get out of this state, you can either press the button on the robot OR send `SetSystemMode PowerCycle/Hibernate`. The robot does not really have a state for this, so not exactly sure how to "solve it", but I think I will listen to shen you send the "stop" command and this will then then send the command to get out of this state too, once again, needs some more experimenting!
-
-You can also send commands via an action and play sounds via an soundid. I gets errors and state every 2 sec, info about charger/battery every 30 sec and testmode/version is still a work in progress, but should work kinda? GetVerion happens when the esphome boots, but because esphome would boot before the robot, if the esphome does not restart or you send the command manually, it will say "Unavailable"
-
-I drilled a small hole into the bumper to be able to route the cables via it, added a piece of plastic so that the cables wont be squised and tried to tape the esp to where the handle part is, I got error: `UI_ERROR_DECK_DEBRIS`. I will experiment to find out where to put the esp for best results, my next try will be somehow on the back of it. The cables right now are just have put a piece of tape over the connections, but I will be soldering the wieres once I have it figured out. 
-
-![esp-on-robot](./pics/esphome/esp-on-robot.png)
-![esp-on-robot-taped-test-1](./pics/esphome/esp-on-robot-test1.png)
