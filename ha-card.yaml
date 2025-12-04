@@ -1,8 +1,17 @@
 type: vertical-stack
+variables:
+  NOTE: >
+    Combatability between esphome config and this card is ensured as long as the
+    major version's match, for relase candicates, betas etc (indicated by
+    X.X-a/b/rc.X), the version has to match perfectly otherwise compatability is
+    not promised. Please try to keep the versions the same, and check the github
+    for updates!
+  project: philip2809.neato-connected
+  version: 1.0-b.3
 cards:
   - type: custom:button-card
     variables:
-      robot_id: REPLACE_WITH_DEVICE_ID
+      robot_id: espcam_test_sensor
     icon: mdi:robot-vacuum-variant
     entity: "[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]"
     size: 50%
@@ -35,11 +44,14 @@ cards:
       icon:
         - color: |
             [[[ 
+              const uiState = states[`sensor.${variables.robot_id}_ui_state`]?.state || '';
+              if (uiState === "Starting...") return '#edb926';
+              if (uiState === "Shutting down...") return 'gray';
               const err = states[`sensor.${variables.robot_id}_robot_error`]?.state || '';
-              const alert = states[`sensor.${variables.robot_id}_robot_alert`]?.state || '';
               if (!err.startsWith('200')) return '#950606';
-              else if (!alert.startsWith('200')) return '#edb926';
-              else return '#00cc00';
+              const alert = states[`sensor.${variables.robot_id}_robot_alert`]?.state || '';
+              if (!alert.startsWith('200')) return '#edb926';
+              return '#00cc00';
             ]]]
       card:
         - border-radius: 20px
@@ -112,7 +124,7 @@ cards:
         cards:
           - type: custom:button-card
             variables:
-              robot_id: REPLACE_WITH_DEVICE_ID
+              robot_id: espcam_test_sensor
             show_icon: false
             entity: "[[[ return `sensor.${variables.robot_id}_robot_alert`; ]]]"
             show_state: false
@@ -132,7 +144,7 @@ cards:
               ]]]
           - type: custom:button-card
             variables:
-              robot_id: REPLACE_WITH_DEVICE_ID
+              robot_id: espcam_test_sensor
             show_icon: false
             entity: "[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]"
             show_state: false
@@ -152,37 +164,131 @@ cards:
               ]]]
   - type: horizontal-stack
     cards:
+      - type: conditional
+        conditions:
+          - condition: and
+            conditions:
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_HOUSECLEANINGPAUSED
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_HOUSECLEANINGRUNNING
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_SPOTCLEANINGPAUSED
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_SPOTCLEANINGRUNNING
+        card:
+          type: custom:button-card
+          variables:
+            robot_id: espcam_test_sensor
+          entity: "[[[ return `button.${variables.robot_id}_house_clean`; ]]]"
+          name: Clean
+          tap_action:
+            action: toggle
+      - type: conditional
+        conditions:
+          - condition: or
+            conditions:
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state: UIMGR_STATE_HOUSECLEANINGPAUSED
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state: UIMGR_STATE_SPOTCLEANINGPAUSED
+        card:
+          type: custom:button-card
+          variables:
+            robot_id: espcam_test_sensor
+          entity: "[[[ return `button.${variables.robot_id}_resume_cleaning`; ]]]"
+          name: Resume
+          tap_action:
+            action: toggle
+      - type: conditional
+        conditions:
+          - condition: or
+            conditions:
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state: UIMGR_STATE_HOUSECLEANINGRUNNING
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state: UIMGR_STATE_SPOTCLEANINGRUNNING
+        card:
+          type: custom:button-card
+          variables:
+            robot_id: espcam_test_sensor
+          entity: "[[[ return `button.${variables.robot_id}_pause_cleaning`; ]]]"
+          name: Pause
+          tap_action:
+            action: toggle
+      - type: conditional
+        conditions:
+          - condition: and
+            conditions:
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_HOUSECLEANINGPAUSED
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_HOUSECLEANINGRUNNING
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_SPOTCLEANINGPAUSED
+              - condition: state
+                entity: sensor.espcam_test_sensor_ui_state
+                state_not: UIMGR_STATE_SPOTCLEANINGRUNNING
+        card:
+          type: custom:button-card
+          variables:
+            robot_id: espcam_test_sensor
+          entity: "[[[ return `button.${variables.robot_id}_spot_clean`; ]]]"
+          name: Spot Clean
+          tap_action:
+            action: toggle
+          hold_action:
+            action: fire-dom-event
+            browser_mod:
+              service: browser_mod.popup
+              data:
+                title: Spot Clean - Height and Width
+                size: normal
+                content:
+                  type: vertical-stack
+                  cards:
+                    - type: entities
+                      entities:
+                        - entity: number.espcam_test_sensor_spot_clean_height
+                          name: Height
+                          icon: mdi:arrow-up-down
+                        - entity: number.espcam_test_sensor_spot_clean_width
+                          name: Width
+                          icon: mdi:arrow-left-right
+                    - type: custom:button-card
+                      size: 20%
+                      name: Start Spot Cleaning
+                      entity: button.espcam_test_sensor_spot_clean_height_width
+                      tap_action:
+                        action: toggle
       - type: custom:button-card
         variables:
-          robot_id: REPLACE_WITH_DEVICE_ID
-        entity: "[[[ return `button.${variables.robot_id}_house_clean`; ]]]"
-        name: Clean
-        tap_action:
-          action: toggle
-      - type: custom:button-card
-        variables:
-          robot_id: REPLACE_WITH_DEVICE_ID
-        entity: "[[[ return `button.${variables.robot_id}_spot_clean`; ]]]"
-        name: Spot Clean
-        tap_action:
-          action: toggle
-      - type: custom:button-card
-        variables:
-          robot_id: REPLACE_WITH_DEVICE_ID
+          robot_id: espcam_test_sensor
         entity: "[[[ return `button.${variables.robot_id}_stop_cleaning`; ]]]"
         name: STOP
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
-          robot_id: REPLACE_WITH_DEVICE_ID
+          robot_id: espcam_test_sensor
         entity: "[[[ return `button.${variables.robot_id}_locate_robot`; ]]]"
         name: Locate
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
-          robot_id: REPLACE_WITH_DEVICE_ID
+          robot_id: espcam_test_sensor
         name: Settings
         icon: mdi:cog
         tap_action:
@@ -230,12 +336,20 @@ cards:
                     entities:
                       - entity: >-
                           [[[ return
+                          `select.${variables.robot_id}_navigation_mode`; ]]]
+                        name: Navigation Mode
+                      - entity: >-
+                          [[[ return
                           `switch.${variables.robot_id}_intenseclean`; ]]]
                         name: Intense Clean
                       - entity: "[[[ return `switch.${variables.robot_id}_led`; ]]]"
                         name: LED
                       - entity: "[[[ return `switch.${variables.robot_id}_wifi`; ]]]"
                         name: WiFi
+                      - entity: >-
+                          [[[ return `switch.${variables.robot_id}_wall_enable`;
+                          ]]]
+                        name: Wall Follower
                       - entity: >-
                           [[[ return
                           `switch.${variables.robot_id}_melody_sounds`; ]]]
@@ -278,6 +392,10 @@ cards:
                           [[[ return
                           `sensor.${variables.robot_id}_battery_temp_c_avg`;]]]
                         name: Battery Temp (avg)
+                      - entity: >-
+                          [[[ return
+                          `sensor.${variables.robot_id}_battery_cycles`;]]]
+                        name: Battery Cycles
                       - entity: >-
                           [[[ return
                           `sensor.${variables.robot_id}_charger_mah`;]]]
