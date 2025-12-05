@@ -57,22 +57,21 @@ Follow these instructions to install the ESP you have flashed the [esphome firmw
 
 17. Connect the wires to the ESP, making sure you make the right connections. From left to right looking at the front of the board the wires need to be connected this way:
 
-| Board | ESP |
-|---|---|
-|RX|TX|
-|3.3V|VCC / 3.3V|
-|TX|RX|
-|GND|GND|
+    | Board | ESP |
+    |---|---|
+    |RX|TX|
+    |3.3V|VCC / 3.3V|
+    |TX|RX|
+    |GND|GND|
 
-*Note that depending on your exact board type you might have more or less choice in which connections you use for TX/RX. One confirmed set of connections is GPIO22 for TX and GPIO21 for RX on a ESP32 D1 Mini.*
+    *Note that depending on your exact board type you might have more or less choice in which connections you use for TX/RX. One confirmed set of connections is GPIO22 for TX and GPIO21 for RX on a ESP32 D1 Mini.*
 
-![Neato board with serial connections indicated](pics/installation/3-connections.jpg "Making the connections to the ESP")
+    ![Neato board with serial connections indicated](pics/installation/3-connections.jpg "Making the connections to the ESP")
 
 18. Wrap your ESP in masking tape / Kapton tape to prevent shorts. Also make sure to secure the connections to the ESP as there will be a lot of vibration. Either include them in the tape wrap or use some hot glue.
 ![ESP installed and taped](pics/installation/4-installed-and-taped.jpg "Installing and taping the ESP")
 
 19. Use some electrical tape on the Neato enclosure across the JST-XH cable wires to secure them.
-
 ![Closeup of JST-XH cable with electrical tape on plastic enclosure](pics/installation/5-electrical-tape-1.jpg "Securing JST-XH cable")
 
 20. Put back the top cover. Don't turn Neato over just yet.
