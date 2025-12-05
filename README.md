@@ -31,9 +31,6 @@ If you have another Neato robot, please open an issue here on github so we can a
 #### How-to connect
 Sadly to be able to repair your neato vacuum you **need to access an USB port or debug pins** to be able to connect to the debug interface. The current methods are:
 
-Drill a hole in the bumper to access the debug port | Open the robot and bend pins or solder to debug connector
-:-------------------------:|:-------------------------:
-![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) |  ![d7-install](./pics/installs/d7-install-serial.png) ![d7-install-esp](./pics/installs/d7-install-esp.png)
 
 I understand these methods are hard or destructive, I am currently investigating the possibility of accessing the debug interface using less extreme methods, however so far I have come up empty handed.
 
@@ -102,10 +99,25 @@ Now, since you may be using a different board then I am, and this might get comp
 Next, you will need to figure out which pins to use, once again this is highly dependent on your board, both based on which ones you can easily connect too, but also what is supported on your platform. In some cases, the pins labeled `TX` and `RX` cannot be used, as these are used to upload the firmware, you will need to find GPIO pins that support using using UART, on the ESP32 many of the GPIO pins can be used.
 
 ## Step 3
+Now you will need to build and flash the images onto your ESP device! While in the editor, press the "Install" button in the top right, since the device is not yet setup, select "Manual download", this will build the configuration file to an image you can flash, this might take a while on a fresh system. 
 
+Once the image has been built, select to download in "Factory format", save this file on your computer and open [ESPHome Web](https://web.esphome.io/). Since this uses WebSerial you will need to use a chromium based browser. ESPHome has an amazing [guide](https://esphome.io/guides/physical_device_connection/) if this is your first time doing this, but to summerize, if you have an usb-port on your device, connect to it, if not you will need to connect to the `TX`, `RX`, `GND` and `3.3V/5V` with an TTY adapter. Then go into bootloader mode by pressing the "BOOT" button, if you don't have one, connect `GPIO0` to `GND`.
 
+Once in ESPHome Web, connect your device to your computer, while going into bootloader mode, then select it in the list. Once selected, upload the firmware file you downloaded before and wait for it to finish. Once finished, it will reboot and you should see it connect to your wifi network.
 
+## Step 4
+Now you will need to connect to the robot over it's serial debug port. 
 
+To verify that everything works, either if you just want to try this out, or test what pins you can use before making a permanent installation you should take the bumper off and connect to the debug pins directly.
+![debug-port-with-cables](./pics/d3/debug-port-with-cables.jpg)
+
+Connect like this: TX-RX (pin you picked), RX-TX (pin you picked), 3.3V to 3.3V, GND to GND.
+
+Once you are ready for the permanent connection, you will have two paths to go down:
+
+Drill a hole in the bumper to access the debug port | Open the robot and connect to the debug port by using an JST-XH or bending pins
+:-------------------------:|:-------------------------:
+![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) |  ![d7-install](./pics/installs/d7-install-serial.png) ![d7-install-esp](./pics/installs/d7-install-esp.png)
 
 ## Acknowledgements
 
