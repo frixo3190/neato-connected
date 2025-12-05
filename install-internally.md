@@ -1,8 +1,8 @@
-# Installing the ESP
+# Install internally
 
 **Warning: before opening up the robot, make sure to open the battery compartment and remove the battery. We will include this again step in the step-by-step procedure.**
 
-Follow these instructions to install the ESP you have flashed the [esphome firmware](esphome.yaml) onto in your robot. The pictures here are from a D5 but should be similar for others.
+The pictures here are from a D5 but should be similar for others. Please read the guide fully before doing it yourself!
 
 ## What you need
 - protective cover for your work surface
@@ -21,7 +21,7 @@ Follow these instructions to install the ESP you have flashed the [esphome firmw
 - About 15 minutes of time
 
 ## Step-by-step
-1. Solder the 4 pieces of wire to one male JST-XH cable (the one that does not have pins sticking out). Make sure to protect the soldering with heat shrink tubing so it cannot short anything.
+1. Solder the 4 pieces of wire to one female JST-XH cable (the one that does not have pins sticking out). Make sure to protect the soldering with heat shrink tubing so it cannot short anything.
 
 2. Put a protective cover over your work surface as there will be some dust coming out of your robot and you don't want that on your kitchen table. A piece of cardboard, plastic or tablecloth will do.
 

@@ -17,37 +17,25 @@ Main card | Settings View
 ![ha-card](./pics/esphome/ha-card.png) |  ![ha-card-settings](./pics/esphome/ha-card-settings.png)
 
 
-**I would like to support all robots where an debug interface, or other controls, is accessible, but since I only have a D3, I can only test on that one. If you have another robot, please open an discussion so we can verify that it works or add support for it!**
+**We would like to support all robots where an debug interface, or other controls, is accessible, but since we only have easy access to test on a D3 and D5, we can only test on those. If you have another robot, please open an discussion so we can verify that it works or add support for it!**
 
-As far as I know, only the D3, D4, D5, D7 and D7 has the firmware `4.5.3` and currenly the config is based on that so the robots that should work with that firmware is as follows:
+As far as we know, only the D3, D4, D5, D7 and D7 has the firmware `4.5.3` and currenly the config is based on that so the robots that should work with that firmware is as follows:
 - Confirmed working: **D3, D5, D7**
 - Should work, need confirmation: **D4, D6** 
-
-If you have another Neato robot, please open an issue here on github so we can add support for it, however we might need your help to know what needs to change!
 
 **Trickier robots**
 - D8 (probably D9, D10) - These robots use a compleatly different board, chip and firmware, and because the debug interface seams to be behind a password lock, this cannot be controlled directly.
 
 #### How-to connect
-Sadly to be able to repair your neato vacuum you **need to access an USB port or debug pins** to be able to connect to the debug interface. The current methods are:
+Sadly to be able to repair your neato vacuum you **need to access an USB port or debug pins** to be able to connect to the debug interface. 
 
-
-I understand these methods are hard or destructive, I am currently investigating the possibility of accessing the debug interface using less extreme methods, however so far I have come up empty handed.
-
-### Getting started!
+# Getting started!
 
 If you havn't heard of home assisnat yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amzing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you don't feel like setting up hardware 1 If you have any questions or problems, don't hesitate to ask for help here in the "issues" section, on our discord or the home assistant [help](https://www.home-assistant.io/help/) page.
 
 First of all you should start thinking about how you want to keep your robot connected, but if you don't want to commit to opening your robot or drilling an hole in the bumper yet, you can always take the bumper off and connect an esp device to the robot and just run it via Home Assistant. If you don't have an Home Assistant installation you can try to control it via the [web server interface](./ha-images.md#webserver-interface), verify that it will work and then if you want, setup home assistant and use it though that. If you go down this route, please check [here]()
 
-{{
-
-    you can skip step 2 and 3, but this will require you to download an precompiled image for your
-
-}}
-
-
-Overview of steps:
+**Overview of steps:**
 1. Setup HACS and install required add-ons
 2. Import the config to ESPHome
 3. Flash the image to your ESP device
@@ -113,15 +101,19 @@ To verify that everything works, either if you just want to try this out, or tes
 
 Connect like this: TX-RX (pin you picked), RX-TX (pin you picked), 3.3V to 3.3V, GND to GND.
 
-Once you are ready for the permanent connection, you will have two paths to go down:
+Once you are ready for the permanent installation, you there is two ways to do it:
 
-Drill a hole in the bumper to access the debug port | Open the robot and connect to the debug port by using an JST-XH or bending pins
+[Externally; by drilling a hole in the bumper](./install-externally.md) | [Internally; by connectiong to the debug port using an JST-XH connector (recommended)](./install-internally.md)
 :-------------------------:|:-------------------------:
-![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) | ![jay-jst-xh](./pics/installs/jay/2-install-JST-XH.jpg) ![tom-bend-pins](./pics/installs/tom/bend-pins.png) ![jay-installed](./pics/installs/jay/4-installed-and-taped.jpg)
+![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) | ![jay-jst-xh](./pics/installs/jay/2-install-JST-XH.jpg) ![jay-installed](./pics/installs/jay/4-installed-and-taped.jpg)
 
-Pick your poison:
-- [Hole drilling, install on outside]()
-- [Open the robot, install on inside]()
+## Step 5
+Copy the contents of [ha-card](./ha-card.yaml), if you changed the name you will need to do a find and replace all instances of `neato_vaccum` to whatever you set, however home assistant may change some characters, see the exact id under the ESPHome device settings. 
+
+Edit a dashboard you where you want the card, add a new section with "Manual" and paste the config for the card. Save and exit edit mode, you should now be able to control your neato connected locally!
+
+## Step 6
+Now you can enjoy your locally controllable neato vacuum cleaner! Of course there is some quirks with this repair, however we feel they are worth the ability to regain functionality.
 
 ## Acknowledgements
 

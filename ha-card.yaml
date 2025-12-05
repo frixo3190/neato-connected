@@ -7,11 +7,11 @@ variables:
     not promised. Please try to keep the versions the same, and check the github
     for updates!
   project: philip2809.neato-connected
-  version: 1.0-b.3
+  version: 1.0-b.4
 cards:
   - type: custom:button-card
     variables:
-      robot_id: espcam_test_sensor
+      robot_id: neato_vaccum
     icon: mdi:robot-vacuum-variant
     entity: "[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]"
     size: 50%
@@ -124,7 +124,7 @@ cards:
         cards:
           - type: custom:button-card
             variables:
-              robot_id: espcam_test_sensor
+              robot_id: neato_vaccum
             show_icon: false
             entity: "[[[ return `sensor.${variables.robot_id}_robot_alert`; ]]]"
             show_state: false
@@ -144,7 +144,7 @@ cards:
               ]]]
           - type: custom:button-card
             variables:
-              robot_id: espcam_test_sensor
+              robot_id: neato_vaccum
             show_icon: false
             entity: "[[[ return `sensor.${variables.robot_id}_robot_error`; ]]]"
             show_state: false
@@ -169,21 +169,21 @@ cards:
           - condition: and
             conditions:
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_HOUSECLEANINGPAUSED
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_HOUSECLEANINGRUNNING
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_SPOTCLEANINGPAUSED
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_SPOTCLEANINGRUNNING
         card:
           type: custom:button-card
           variables:
-            robot_id: espcam_test_sensor
+            robot_id: neato_vaccum
           entity: "[[[ return `button.${variables.robot_id}_house_clean`; ]]]"
           name: Clean
           tap_action:
@@ -193,15 +193,15 @@ cards:
           - condition: or
             conditions:
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state: UIMGR_STATE_HOUSECLEANINGPAUSED
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state: UIMGR_STATE_SPOTCLEANINGPAUSED
         card:
           type: custom:button-card
           variables:
-            robot_id: espcam_test_sensor
+            robot_id: neato_vaccum
           entity: "[[[ return `button.${variables.robot_id}_resume_cleaning`; ]]]"
           name: Resume
           tap_action:
@@ -211,15 +211,15 @@ cards:
           - condition: or
             conditions:
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state: UIMGR_STATE_HOUSECLEANINGRUNNING
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state: UIMGR_STATE_SPOTCLEANINGRUNNING
         card:
           type: custom:button-card
           variables:
-            robot_id: espcam_test_sensor
+            robot_id: neato_vaccum
           entity: "[[[ return `button.${variables.robot_id}_pause_cleaning`; ]]]"
           name: Pause
           tap_action:
@@ -229,21 +229,21 @@ cards:
           - condition: and
             conditions:
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_HOUSECLEANINGPAUSED
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_HOUSECLEANINGRUNNING
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_SPOTCLEANINGPAUSED
               - condition: state
-                entity: sensor.espcam_test_sensor_ui_state
+                entity: sensor.neato_vaccum_ui_state
                 state_not: UIMGR_STATE_SPOTCLEANINGRUNNING
         card:
           type: custom:button-card
           variables:
-            robot_id: espcam_test_sensor
+            robot_id: neato_vaccum
           entity: "[[[ return `button.${variables.robot_id}_spot_clean`; ]]]"
           name: Spot Clean
           tap_action:
@@ -260,35 +260,35 @@ cards:
                   cards:
                     - type: entities
                       entities:
-                        - entity: number.espcam_test_sensor_spot_clean_height
+                        - entity: number.neato_vaccum_spot_clean_height
                           name: Height
                           icon: mdi:arrow-up-down
-                        - entity: number.espcam_test_sensor_spot_clean_width
+                        - entity: number.neato_vaccum_spot_clean_width
                           name: Width
                           icon: mdi:arrow-left-right
                     - type: custom:button-card
                       size: 20%
                       name: Start Spot Cleaning
-                      entity: button.espcam_test_sensor_spot_clean_height_width
+                      entity: button.neato_vaccum_spot_clean_height_width
                       tap_action:
                         action: toggle
       - type: custom:button-card
         variables:
-          robot_id: espcam_test_sensor
+          robot_id: neato_vaccum
         entity: "[[[ return `button.${variables.robot_id}_stop_cleaning`; ]]]"
         name: STOP
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
-          robot_id: espcam_test_sensor
+          robot_id: neato_vaccum
         entity: "[[[ return `button.${variables.robot_id}_locate_robot`; ]]]"
         name: Locate
         tap_action:
           action: toggle
       - type: custom:button-card
         variables:
-          robot_id: espcam_test_sensor
+          robot_id: neato_vaccum
         name: Settings
         icon: mdi:cog
         tap_action:
