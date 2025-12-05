@@ -18,7 +18,7 @@ Follow these instructions to install the ESP you have flashed the [esphome firmw
 - Electrical masking tape / Kapton tape to prevent shorts
 - (optional) Hot glue
 - Ability to follow written instructions and basic soldering
-- About 5-15 minutes of time
+- About 15 minutes of time
 
 ## Step-by-step
 1. Solder the 4 pieces of wire to one male JST-XH cable (the one that does not have pins sticking out). Make sure to protect the soldering with heat shrink tubing so it cannot short anything.
