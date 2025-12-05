@@ -49,6 +49,8 @@ Follow these instructions to install the ESP you have flashed the [esphome firmw
 |TX|RX|
 |GND|GND|
 
+*Note that depending on your exact board type you might have more or less choice in which connections you use for TX/RX. One confirmed set of connections is GPIO22 for TX and GPIO21 for RX on a ESP32 D1 Mini.*
+
 ![Neato board with serial connections indicated](pics/installation/3-connections.jpg "Making the connections to the ESP")
 14. Wrap your ESP in masking tape / Kapton tape to prevent shorts. Also make sure to secure the connections to the ESP as there will be a lot of vibration. Either include them in the tape wrap or use some hot glue.
 ![ESP installed and taped](pics/installation/4-installed-and-taped.jpg "Installing and taping the ESP")
