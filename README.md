@@ -117,7 +117,11 @@ Once you are ready for the permanent connection, you will have two paths to go d
 
 Drill a hole in the bumper to access the debug port | Open the robot and connect to the debug port by using an JST-XH or bending pins
 :-------------------------:|:-------------------------:
-![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) |  ![d7-install](./pics/installs/d7-install-serial.png) ![d7-install-esp](./pics/installs/d7-install-esp.png)
+![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) | ![jay-jst-xh](./pics/installs/jay/2-install-JST-XH.jpg) ![tom-bend-pins](./pics/installs/tom/bend-pins.png) ![jay-installed](./pics/installs/jay/4-installed-and-taped.jpg)
+
+Pick your poison:
+- [Hole drilling, install on outside]()
+- [Open the robot, install on inside]()
 
 ## Acknowledgements
 
