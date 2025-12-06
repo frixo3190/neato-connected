@@ -31,7 +31,7 @@ Sadly to be able to repair your neato vacuum you **need to access an USB port or
 
 # Getting started!
 
-If you havn't heard of home assisnat yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amzing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you don't feel like setting up hardware 1 If you have any questions or problems, don't hesitate to ask for help here in the "issues" section, on our discord or the home assistant [help](https://www.home-assistant.io/help/) page.
+if you haven't heard of home assistant yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amzing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you have any questions or problems, don't hesitate to ask for help here in the [discusstions](../discussions) section, on our [discord](https://discord.gg/PAgwhWvyD8) or the home assistant [help](https://www.home-assistant.io/help/) page.
 
 First of all you should start thinking about how you want to keep your robot connected, but if you don't want to commit to opening your robot or drilling an hole in the bumper yet, you can always take the bumper off and connect an esp device to the robot and just run it via Home Assistant. If you don't have an Home Assistant installation you can try to control it via the [web server interface](./ha-images.md#webserver-interface), verify that it will work and then if you want, setup home assistant and use it though that. If you go down this route, please check [here]()
 
@@ -80,9 +80,9 @@ If you want to add more devices, best practice is to set the api key and ota pas
 ### Config file
 Once back at the ESPHome main page, click the big green button in the bottom left to add a new device. Read the information, but for now, click "Continue" and either import the [`neato_vacuum.yaml`](..) file, or start with an empty configuration.
 
-**The folloing two steps might be hard to do, feel free to ask for help in the discord or discusstions.**
+**The following two steps might be hard to do, feel free to ask for help in the discord or discussions.**
 
-Now, since you may be using a different board then I am, and this might get complicated. You will need to find out what platform to set. Here is the list of [availible platforms](https://esphome.io/components/#supported-microcontrollers). 
+Now, since you may be using a different board then I am, and this might get complicated. You will need to find out what platform to set. Here is the list of [available platforms](https://esphome.io/components/#supported-microcontrollers). 
 
 Next, you will need to figure out which pins to use, once again this is highly dependent on your board, both based on which ones you can easily connect too, but also what is supported on your platform. In some cases, the pins labeled `TX` and `RX` cannot be used, as these are used to upload the firmware, you will need to find GPIO pins that support using using UART, on the ESP32 many of the GPIO pins can be used.
 
