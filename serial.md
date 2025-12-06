@@ -3,10 +3,9 @@
 ## Serial interface
 There seams to be two different serial interfaces on the robot. One you can connect via the usb port where the dustbin resides, and blocks. The other one with jumper wires or soldering. Here you can connect via a TTY adapter. 
 
-
 ### On different robots
 
-**NOTE: I only have a D3, if you can verify this data separatly, please tell me**
+**NOTE: Verified robots are D3, D5, D7. It should be the same for the other D4 and D6**
 
 #### D3/D4
 I suspect that the D4 looks the same as the D3, because from some research the only difference was their battery and maybe filter.
@@ -28,8 +27,11 @@ Looks once again practically identical to the D3. It has the extra sidebrush mot
 But I am very very certain it is the same for D3/D4/D5/D6/D7.
 
 The pinout looks like this:
+
 ![pinout on d3](./pics/d3/pinout.png)
 ![pinout connected](./pics/d3/pinout-connected.png)
+
+(The pin labled 3.3V? is a 3.3V pin)
 
 my setup
 ![my setup](./pics/d3/pinout-tty-setup.jpg)
@@ -152,6 +154,8 @@ Commands that was in the old programming manual but I don't know how to use:
 ```
 GetSysLog
 ```
+
+Since then I have found more [hidden commands](./hidden-commands.md)!
 
 #### Differences I found in 3.2.0 and 4.5.3
 
