@@ -36,11 +36,11 @@ Debug port | Debug port with bumber
 
 6. Pull some cables thour the hole and connect them to the debug port
 
-7. Put the bumper back on
-
-8. Connect the cables
+7. Connect the cables
 ![cables-via-bumper](./pics/d3/cables-via-bumper.jpg)
 ![cables-via-bumper](./pics/d3/pinout.png)
+
+8. Put the bumper back on
 
 9. Connect to the ESP like:
     | Robot | ESP |
