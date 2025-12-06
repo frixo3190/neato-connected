@@ -61,7 +61,7 @@ The pictures here are from a D5 but should be similar for others. Please read th
 
 18. Connect the wires to the ESP, making sure you make the right connections. From left to right looking at the front of the board the wires need to be connected this way:
 
-    | Board | ESP |
+    | Robot | ESP |
     |---|---|
     |RX|TX|
     |3.3V|VCC / 3.3V|
@@ -90,3 +90,11 @@ The pictures here are from a D5 but should be similar for others. Please read th
 25. Reconnect battery and close battery compartment.
 
 26. Turn Neato on and enjoy!
+
+
+## Bending pins (not recommended)
+You could, instead of using an JST-XH connector bind the debug pins to allow for dupont connectors to connect.
+
+![bent-pins-dupont](./pics/installs/tom/bend-pins.png)
+
+Bending the pins you risk breaking the board, so this method should be avoided.
