@@ -62,14 +62,17 @@ The ESPHome config is designed for the latest firmware version, `4.5.3`, so you 
 
 To check your version you can:
 - If you app still works, check in there
-- Connect to the robot with an usb cable, connect to the dustbin and
-    - on windows use [neatotoolio]()
-    - on unix systems, connect with screen:
+- Connect to the robot with an usb cable, at the port where the dustbin is
+    - on windows use [NeatoToolio](https://github.com/jdredd87/NeatoToolio) or connect via serial as with unix systems
+    - on unix systems, connect to serial:
         1. `screen /dev/ttyUSB0 115200`
         2. Once connected send the command `GetVersion`
-        3. `Look for `
+        3. Look for the line with `Software`, this should be `Software,4,5,3,189,0`
+- Restart the robot and send a curl request to `https://<robot-ip>:4443/info` with `--ciphers ALL:@SECLEVEL=0`. This should work both once connected to a wifi and on the robot AP.
 
-## Step 1
+If your firmware version is not `4.5.3` then you will need to update to the latest firmware, for this you will need to download the latest firmware from [here](https://github.com/RobertSundling/neato-botvac) and try to install it. I was able to install with the original certificate and all when I factory reset my robot and didn't connect it to the internet. If you are having troubles, try the different firmware images with different certificate dates, and if nothing works, feel free to ask for help here!
+
+## Step 2
 
 We need to install certain plugins and addons to the home assistant installation to use all the features of this project.
 
@@ -83,7 +86,7 @@ If you don't already have hacs, follow their guide to set it up: https://www.hac
 
 After installing, it will ask you to reload the page, please do so.
 
-## Step 2
+## Step 3
 
 ### ESPHome Secrets
 Open the ESPHome Builder and click the "Secrets" in the top right. Make sure your secrets include at the minimum this:
@@ -113,14 +116,14 @@ Next, you will need to figure out which pins to use, once again this is highly d
 - [ESP32](https://randomnerdtutorials.com/esp32-pinout-reference-gpios/)
 - [ESP8266](https://randomnerdtutorials.com/esp8266-pinout-reference-gpios/)
 
-## Step 3
+## Step 4
 Now you will need to build and flash the images onto your ESP device! While in the editor, press the "Install" button in the top right, since the device is not yet setup, select "Manual download", this will build the configuration file to an image you can flash, this might take a while on a fresh system. 
 
 Once the image has been built, select to download in "Factory format", save this file on your computer and open [ESPHome Web](https://web.esphome.io/). Since this uses WebSerial you will need to use a chromium based browser. ESPHome has an amazing [guide](https://esphome.io/guides/physical_device_connection/) if this is your first time doing this, but to summerize, if you have an usb-port on your device, connect to it, if not you will need to connect to the `TX`, `RX`, `GND` and `3.3V/5V` with an TTY adapter. Then go into bootloader mode by pressing the "BOOT" button, if you don't have one, connect `GPIO0` to `GND`.
 
 Once in ESPHome Web, connect your device to your computer, while going into bootloader mode, then select it in the list. Once selected, upload the firmware file you downloaded before and wait for it to finish. Once finished, it will reboot and you should see it connect to your wifi network.
 
-## Step 4
+## Step 5
 Now you will need to connect to the robot over it's serial debug port. 
 
 To verify that everything works, either if you just want to try this out, or test what pins you can use before making a permanent installation you should take the bumper off and connect to the debug pins directly.
@@ -142,13 +145,17 @@ Once you are ready for the permanent installation, you there is two ways to do i
 :-------------------------:|:-------------------------:
 ![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) | ![jay-jst-xh](./pics/installs/jay/2-install-JST-XH.jpg) ![jay-installed](./pics/installs/jay/4-installed-and-taped.jpg)
 
-## Step 5
+## Step 6
 Copy the contents of [ha-card](./ha-card.yaml), if you changed the name you will need to do a find and replace all instances of `neato_vaccum` to whatever you set, however home assistant may change some characters, see the exact id under the ESPHome device settings. 
 
 Edit a dashboard you where you want the card, add a new section with "Manual" and paste the config for the card. Save and exit edit mode, you should now be able to control your neato connected locally!
 
-## Step 6
+## Step 7
 Now you can enjoy your locally controllable neato vacuum cleaner! Of course there is some quirks with this repair, however we feel they are worth the ability to regain functionality.
+
+Missing features or annoying workarounds:
+- Haven't found a way to tell the robot to dock via the serial interface
+- Once in cleaning paused/running mode, to get the robot back into standby/idle, you need to either hold the button on the robot, or press the "STOP" button in home assistant, which will reboot the robot. You can also let the cleaning finish of course.
 
 ## Acknowledgements
 
@@ -160,5 +167,5 @@ Analyzing Security in a Hardened IoT Ecosystem](https://www.usenix.org/system/fi
 - [@jeroenterheerdt](https://github.com/jeroenterheerdt) for testing, reviewing, writing the guide for installing internally and the original [neato-serial](https://github.com/jeroenterheerdt/neato-serial)
 - [@algaen](https://github.com/algaen) for the info about the D8 (D9, D10?) robots
 - [@tomwj](https://github.com/tomwj) for testing and pictures installing it internally in a D7
-
+- [@RobertSundling](https://github.com/RobertSundling) for the [firmware files](https://github.com/RobertSundling/neato-botvac)
 
