@@ -9,8 +9,8 @@ esp32:
 
 # You will need to figure out which pins work on your board for UART.
 substitutions:
-  uart_tx: GPIO12
-  uart_rx: GPIO13
+  uart_tx: <SET BASED ON YOUR DEVICE>
+  uart_rx: <SET BASED ON YOUR DEVICE>
 
 # If you want to have access via the webserver, uncomment the following 2 lines (remove the #)
 #web_server:
@@ -29,7 +29,7 @@ esphome:
 #   Please try to keep the versions the same, and check the github for updates!
   project: 
     name: philip2809.neato-connected
-    version: 1.0-b.4
+    version: 1.0
 
   on_boot:
     - priority: 600
@@ -137,7 +137,8 @@ ota:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-
+  # If your router sets another TLD for local devices, specify that here
+  #domain: .<whatever you are using, e.g. lan>
 
 logger:
   baud_rate: 0
@@ -406,7 +407,7 @@ uart:
           //else {
             //  id(uiState).publish_state(command.c_str());
           //}
-§
+
 
 sensor:
   # --- GetCharger ---

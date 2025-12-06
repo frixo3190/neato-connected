@@ -1,9 +1,10 @@
 ## All the states that exist in firmware version 3.2.0
 
-I don't expect much core functionallity has changed, so the list should be about the same for `4.5.3`, however the number have changed! Also `4.5.3` not only has an "Current UI State is" but also an "Current Robot State is", and since I cannot get a list of all the robot states. 
+I don't expect much core functionallity has changed, so the list should be about the same for `4.5.3`, however the number have changed! Also `4.5.3` not only has an "Current UI State is" but also an "Current Robot State is", and I have included what those states probably are.
 
 
 #### Errors/Alerts
+This list I took from the `4.5.3` firmware with the command `SetUIError list`
 ```
 200: UI_ALERT_INVALID
 201: UI_ALERT_RETURN_TO_BASE
@@ -151,3 +152,41 @@ UIMGR_STATE_SWUPGRADE
 UIMGR_STATE_OTA_LOGUPLOAD
 UIMGR_STATE_INVALID
 ```
+
+#### Robot States:
+```
+ST_F3_InteriorCleaning
+ST_F1_Undocking
+ST_F2_PartialMapManagement
+ST_F21_Exploring
+ST_F4_BoundaryFollowing
+ST_F5_PickedUp
+ST_F6_CleaningErrRecovery
+ST_F7_CleaningError
+ST_G3_InteriorCleaning
+ST_G1_Undocking
+ST_G2_PartialMapManagement
+ST_G21_Exploring
+ST_G4_BoundaryFollowing
+ST_G5_PickedUp
+ST_G6_CleaningErrRecovery
+ST_G7_CleaningError
+ST_M1_Charging_Cleaning
+ST_M2_Charging_StdBy
+ST_T3_ProxFollowTest
+ST_T6_BoundFollowOnly
+ST_T7_TestDocking
+ST_T8_TestService
+ST_T1_TestObstacleMonitor
+ST_T4_TestMotionExecutor
+ST_A_Init
+ST_C_Standby
+ST_F_Cleaning
+ST_G_SpotCleaning
+ST_K_Critical
+ST_L_Safety
+ST_M_Charging
+ST_P_PopState
+ST_T_Test
+ST_X_ManNav
+´´´

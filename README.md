@@ -1,6 +1,19 @@
+
+[![release][release-badge]][release-url]
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V61PBIY6)
+[![Buy me a coffee][buymeacoffee-shield]][buymeacoffee]
+
+[buymeacoffee]: https://www.buymeacoffee.com/philip2809
+[buymeacoffee-shield]: https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png
+[release-url]: https://github.com/philip2809/neato-connected/releases
+[release-badge]: https://img.shields.io/github/v/release/philip2809/neato-connected?style=flat-square
+
+### [Discord](https://discord.gg/PAgwhWvyD8)
+
 # neato-connected
 
-# WARNING - this branch is for work in progress text! please go to the main branch!
+If you want to learn about the inner workings of neato robots and my findings, please go [here](./findings.md), if you want to repair your neato to regain some of the lost functionallity, continue reading on this page. To make the proccess as easy as possible, I recommend to read the entire guide before actucally doing anything. 
 
 ### What is this?
 
@@ -44,7 +57,7 @@ Sadly to be able to repair your neato vacuum you **need to access an USB port or
 
 # Getting started!
 
-if you haven't heard of home assistant yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amzing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you have any questions or problems, don't hesitate to ask for help here in the [discusstions](../discussions) section, on our [discord](https://discord.gg/PAgwhWvyD8) or the home assistant [help](https://www.home-assistant.io/help/) page.
+if you haven't heard of home assistant yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amzing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you have any questions or problems, don't hesitate to ask for help here in the [discusstions](https://github.com/Philip2809/neato-connected/discussions) section, on our [discord](https://discord.gg/PAgwhWvyD8) or the home assistant [help](https://www.home-assistant.io/help/) page.
 
 First of all you should start thinking about how you want to keep your robot connected, but if you don't want to commit to opening your robot or drilling an hole in the bumper yet, you can always take the bumper off and connect an esp device to the robot and just run it via Home Assistant.
 
@@ -127,7 +140,7 @@ Once in ESPHome Web, connect your device to your computer, while going into boot
 Now you will need to connect to the robot over it's serial debug port. 
 
 To verify that everything works, either if you just want to try this out, or test what pins you can use before making a permanent installation you should take the bumper off and connect to the debug pins directly.
-![debug-port-with-cables](./pics/d3/debug-port-with-cables.jpg)
+![debug-port-with-cables-annotated](./pics/d3/debug-port-with-cables-annotated.jpg)
 
 | Robot | ESP |
 |---|---|
@@ -154,6 +167,10 @@ Now you can enjoy your locally controllable neato vacuum cleaner! Of course ther
 Missing features or annoying workarounds:
 - Haven't found a way to tell the robot to dock via the serial interface
 - Once in cleaning paused/running mode, to get the robot back into standby/idle, you need to either hold the button on the robot, or press the "STOP" button in home assistant, which will reboot the robot. You can also let the cleaning finish of course.
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=philip2809/neato-connected&type=date&legend=top-left)](https://www.star-history.com/#philip2809/neato-connected&type=date&legend=top-left)
 
 ## Acknowledgements
 

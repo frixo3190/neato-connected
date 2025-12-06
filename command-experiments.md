@@ -34,6 +34,7 @@ I have now tested that you can send commands while reciving data and that the ro
 
 GetState will no longer be needed as we will be in TestMode so this will always be `UIMGR_STATE_TESTMODE`.
 
+There is also quite a lot of [hidden commands](./hidden-commands.md).
 
 ### Raw commands
 #### Keeping here for remembering
