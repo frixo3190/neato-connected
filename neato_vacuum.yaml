@@ -10,6 +10,7 @@ esp32:
 # You will need to figure out which pins work on your board for UART.
 substitutions:
   uart_tx: <SET BASED ON YOUR DEVICE>
+# THIS IS A BETA VERSION! IT MAY BE UNSABLE OR NOT WORKING, FOR THE LATEST PLEASE DOWNLOAD FROM RELEASES!
   uart_rx: <SET BASED ON YOUR DEVICE>
 
 # If you want to have access via the webserver, uncomment the following 2 lines (remove the #)
@@ -17,7 +18,7 @@ substitutions:
 #  port: 80
 
 esphome:
-  name: neato-vaccum # If you want another name, change it here, remeber to replace it in the ha-card.yaml!
+  name: neato-vacuum # If you want another name, change it here, remeber to replace it in the ha-card.yaml!
 ##############################################################################################################################
 
 
@@ -29,13 +30,30 @@ esphome:
 #   Please try to keep the versions the same, and check the github for updates!
   project: 
     name: philip2809.neato-connected
-    version: 1.0
+    version: 1.1-b.1
 
   on_boot:
     - priority: 600
       then:
-        - lambda: 'id(uiState).publish_state("Starting...");'
+        - lambda: !lambda |-
+            id(uiState).publish_state("Starting...");
 
+    - priority: -100
+      then:
+        - lambda: !lambda |-
+            id(uiState).publish_state("Starting...");
+
+            ESPTime t = ESPTime::from_epoch_local(id(g_last_cleaning_start_time));
+            std::string ts = t.strftime("%Y-%m-%d %H:%M:%S");
+            id(last_cleaning_time).publish_state(ts.c_str());
+
+            if (id(g_last_cleaning_type) == 0) {
+              id(last_cleaning_type).publish_state("HOUSE");
+            } else if (id(g_last_cleaning_type) == 1) {
+              id(last_cleaning_type).publish_state("SPOT");
+            }
+
+            id(last_cleaning_duration).publish_state(id(g_last_cleaning_duration));
 
 script:
   - id: get_user_settings
@@ -84,11 +102,39 @@ script:
       - delay: 100ms
       - uart.write: "SetSystemMode PowerCycle \n"
 
+  - id: cleaning_stopped
+    then: 
+      - lambda: !lambda |-
+          uint64_t now_ts = id(homeassistant_time).now().timestamp;
+          uint64_t start_ts = id(g_last_cleaning_start_time);
+
+          if (start_ts > 0) {
+              uint32_t duration_min = (now_ts - start_ts) / 60;
+              id(g_last_cleaning_duration) = duration_min;
+              id(last_cleaning_duration).publish_state(duration_min);
+          }
+
+
 globals:
   - id: initial_ready
     type: bool
     restore_value: no
     initial_value: 'false'
+
+  # --- STORE IN FLASH, MAX 96 BYTES! ---
+  - id: g_last_cleaning_start_time         # 8 BYTES
+    type: uint64_t
+    restore_value: yes
+
+  - id: g_last_cleaning_type               # 4 BYTES
+    type: uint32_t
+    restore_value: yes
+
+  - id: g_last_cleaning_duration           # 4 BYTES
+    type: uint32_t
+    restore_value: yes
+  # --- TOTAL BYTES USED: 16 BYTES ---
+
 
 interval:
   - interval: 2sec
@@ -131,7 +177,7 @@ api:
 
 ota:
   - platform: esphome
-    password: !secret neato_vaccum_ota
+    password: !secret neato_vacuum_ota
 
 
 wifi:
@@ -158,7 +204,7 @@ uart:
       #delimiter: "\n"
       delimiter: "\x1A"
     sequence:
-      - lambda: |-
+      - lambda: !lambda |-
           UARTDebug::log_string(direction, bytes);
 
           // convert bytes -> std::string
@@ -347,6 +393,41 @@ uart:
               if (ui_line.find(prefix_ui) == 0) {
                   std::string ui_state = ui_line.substr(strlen(prefix_ui));
                   trim(ui_state);
+                  std::string old_state = id(uiState).state;
+
+                  bool old_spot = (old_state == "UIMGR_STATE_SPOTCLEANINGPAUSED" ||
+                                  old_state == "UIMGR_STATE_SPOTCLEANINGRUNNING");
+
+                  bool new_spot = (ui_state == "UIMGR_STATE_SPOTCLEANINGPAUSED" ||
+                                  ui_state == "UIMGR_STATE_SPOTCLEANINGRUNNING");
+
+                  bool old_house = (old_state == "UIMGR_STATE_HOUSECLEANINGPAUSED" ||
+                                    old_state == "UIMGR_STATE_HOUSECLEANINGRUNNING");
+
+                  bool new_house = (ui_state == "UIMGR_STATE_HOUSECLEANINGPAUSED" ||
+                                    ui_state == "UIMGR_STATE_HOUSECLEANINGRUNNING");
+                  // Cleaning started
+                  if (!old_spot && new_spot) {
+                      // Mark start time
+                      id(g_last_cleaning_start_time) = id(homeassistant_time).now().timestamp;
+                      id(g_last_cleaning_type) = 1;  // SPOT = 1
+
+                      id(last_cleaning_time).publish_state(id(homeassistant_time).now().strftime("%Y-%m-%d %H:%M:%S"));
+                      id(last_cleaning_type).publish_state("SPOT");
+                  } else if (!old_house && new_house) {
+                      id(g_last_cleaning_start_time) = id(homeassistant_time).now().timestamp;
+                      id(g_last_cleaning_type) = 0;  // HOUSE = 0
+
+                      id(last_cleaning_time).publish_state(id(homeassistant_time).now().strftime("%Y-%m-%d %H:%M:%S"));
+                      id(last_cleaning_type).publish_state("HOUSE");
+                  } else {
+                      // Cleaning stopped
+                      bool old_cleaning = old_spot || old_house;
+                      bool new_cleaning = new_spot || new_house;
+
+                      if (old_cleaning && !new_cleaning) id(cleaning_stopped).execute();
+                  }
+
                   id(uiState).publish_state(ui_state.c_str());
               }
 
@@ -484,6 +565,12 @@ sensor:
     unit_of_measurement: "cycles"
     entity_category: "diagnostic"
 
+  # --- Last cleaning ---
+  - platform: template
+    name: "Last cleaning duration"
+    id: last_cleaning_duration
+    unit_of_measurement: "min"
+
 
 binary_sensor:
   # --- GetErr ---
@@ -538,8 +625,20 @@ binary_sensor:
     name: "Thermistor Present"
     entity_category: "diagnostic"
 
+time:
+  - platform: homeassistant
+    id: homeassistant_time
 
 text_sensor:
+  # --- Last cleaning ---
+  - platform: template
+    name: "Last cleaning time"
+    id: last_cleaning_time
+
+  - platform: template
+    name: "Last cleaning type"
+    id: last_cleaning_type
+
   # --- GetErr ---
   - platform: template
     id: robotError
@@ -647,6 +746,7 @@ switch:
       - uart.write: "SetUserSettings WallEnable OFF \n"
       - delay: 100ms
       - uart.write: "GetUserSettings \n"
+    entity_category: "diagnostic"
 
   - platform: template
     name: "Eco Mode"
@@ -805,6 +905,7 @@ button:
     icon: mdi:stop
     on_press:
       - uart.write: "Clean Stop \n"
+      - script.execute: cleaning_stopped
       - delay: 100ms
       - script.execute: powercycle
 

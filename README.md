@@ -57,7 +57,7 @@ Sadly to be able to repair your neato vacuum you **need to access an USB port or
 
 # Getting started!
 
-if you haven't heard of home assistant yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amzing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you have any questions or problems, don't hesitate to ask for help here in the [discusstions](https://github.com/Philip2809/neato-connected/discussions) section, on our [discord](https://discord.gg/PAgwhWvyD8) or the home assistant [help](https://www.home-assistant.io/help/) page.
+if you haven't heard of home assistant yet then this is an awesome time to learn about it! It is an open source home automation tool that puts local control and privacy first. Read more about them on their [website](https://www.home-assistant.io/) and try their [live demo](https://demo.home-assistant.io) if you want! There is a lot of great guides and information about home hassistant on youtube and their forums! They also have some amazing guides on their [site](https://www.home-assistant.io/installation/) to get an home assistant installation going. If you have any questions or problems, don't hesitate to ask for help here in the [discusstions](https://github.com/Philip2809/neato-connected/discussions) section, on our [discord](https://discord.gg/PAgwhWvyD8) or the home assistant [help](https://www.home-assistant.io/help/) page.
 
 First of all you should start thinking about how you want to keep your robot connected, but if you don't want to commit to opening your robot or drilling an hole in the bumper yet, you can always take the bumper off and connect an esp device to the robot and just run it via Home Assistant.
 
@@ -152,12 +152,12 @@ To verify that everything works, either if you just want to try this out, or tes
 
 Once you are ready for the permanent installation, you there is two ways to do it:
 
-[Externally; by drilling a hole in the bumper](./install-externally.md) | [Internally; by connectiong to the debug port using an JST-XH connector (recommended)](./install-internally.md)
+[Externally; by drilling a hole in the bumper](./install-externally.md) | [Internally; by connecting to the debug port using an JST-XH connector (recommended)](./install-internally.md)
 :-------------------------:|:-------------------------:
 ![cables-via-bumper](./pics/d3/cables-via-bumper.jpg) ![d3-install-outside](./pics/installs/d3-install-outside.png) | ![jay-jst-xh](./pics/installs/jay/2-install-JST-XH.jpg) ![jay-installed](./pics/installs/jay/4-installed-and-taped.jpg)
 
 ## Step 6
-Copy the contents of [ha-card](https://github.com/philip2809/neato-connected/releases/latest/download/ha-card.yaml), if you changed the name you will need to do a find and replace all instances of `neato_vaccum` to whatever you set, however home assistant may change some characters, see the exact id under the ESPHome device settings. 
+Copy the contents of [ha-card](https://github.com/philip2809/neato-connected/releases/latest/download/ha-card.yaml), if you changed the name you will need to do a find and replace all instances of `neato_vacuum` to whatever you set, however home assistant may change some characters, see the exact id under the ESPHome device settings. 
 
 Edit a dashboard you where you want the card, add a new section with "Manual" and paste the config for the card. Save and exit edit mode, you should now be able to control your neato connected locally!
 
