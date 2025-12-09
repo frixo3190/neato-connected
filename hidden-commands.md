@@ -115,6 +115,13 @@ ClearFiles
     Life - ??
 ```
 
+### Other Hidden commands
+```
+NewBattery
+    (NOTE: Exact function unknown, but some users report this can fix an issue where a new battery isn't being charged)
+    Tells the robot a new battery has been installed.
+```
+
 ### Hidden gems looking at the decompiled code:
 ```
 YOU OVERFLOWED A 64-bit NUMBER!  WHAT WERE YOU THINKING???
