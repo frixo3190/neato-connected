@@ -6,6 +6,7 @@ Error, Message, Detail message
 249: UI_ERROR_DUST_BIN_MISSING, Put dirt bin back in
 250: UI_ERROR_DUST_BIN_FULL, Please empty my dirt bin and filter, Empty dirt bin & filter and clean drop & wall sensors
 251: UI_ERROR_BATTERY_OVERTEMP, Batter fault, tbd
+255: UI_ERROR_PICKED_UP, Please put me down, tbd
 256: UI_ERROR_RECONNECT_FAILED, Move base to new location, tbd
 257: UI_ERROR_LWHEEL_STUCK, Clean my left wheel, tbd
 258: UI_ERROR_RWHEEL_STUCK, Clean my right wheel, tbd
