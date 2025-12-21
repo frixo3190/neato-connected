@@ -15,6 +15,8 @@
 
 # neato-connected
 
+Current status: Beta for return to dock and manual driving is out, working on a fully non-ha version and docs overhaul!
+
 If you want to learn about the inner workings of neato robots and my findings, please go [here](./findings.md), if you want to repair your neato to regain some of the lost functionallity, continue reading on this page. To make the proccess as easy as possible, I recommend to read the entire guide before actucally doing anything. 
 
 Since the aim of this project is quite big, and my end goal is to make a package that can be used with any lidar-powered vacuum cleaner, I have decided to split it up into stages. We are currently at stage 1, and the first number in the version will define which stage the release is for.
@@ -23,7 +25,7 @@ Since the aim of this project is quite big, and my end goal is to make a package
     - Neato cleaning logic
     - Will always maintain and get support
     - Occasional updates based on feature requests or bugs
-    - (nogo-lines and return to dock MAY be possible, however, very rudimentary)
+    - Return to dock and manual driving in beta right now!
 - Stage 2. Currently a work in progress, all the features in a non-ideal way (ETA: March 2026, if all stars align)
     - ROS2 & Neato hybrid
         - Neato cleaning logic
