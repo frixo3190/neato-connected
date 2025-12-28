@@ -135,6 +135,7 @@ If you don't already have hacs, follow their guide to set it up: https://www.hac
     - An button element to place on a dashboard with a lot of configurations to make the card look nice.
 - `browser_mod`
     - Allow for a popup when clicking on settings or holding down the spot clean button.
+    - Don't forget to add the "Browser Mod" integration in Settings -> Devices & Services -> Add Integration or click this button: [![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=browser_mod)
     - It will ask you if you want to register your browser as a device, you don't need to do this for it to work!
 
 After installing these add-ons you need to refresh your page, however, some browsers need a hard refresh. This you can do by pressing `Ctrl + Shift + R`.
