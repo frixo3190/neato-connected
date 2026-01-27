@@ -9,15 +9,13 @@ esp32:
 
 # You will need to figure out which pins work on your board for UART.
 substitutions:
-  uart_tx: <SET BASED ON YOUR DEVICE>
+  uart_tx: 16
 # THIS IS A BETA VERSION! IT MAY BE UNSABLE OR NOT WORKING, FOR THE LATEST PLEASE DOWNLOAD FROM RELEASES!
-  uart_rx: <SET BASED ON YOUR DEVICE>
+  uart_rx: 17
 
 # If you want to have access via the webserver, uncomment the following 2 lines (remove the #)
 web_server:
  port: 80
-
-matter:
 
 esphome:
   name: neato-vacuum # If you want another name, change it here, remeber to replace it in the ha-card.yaml!
@@ -192,7 +190,7 @@ wifi:
     ssid: "R2D2_secours"
     password: "motdepasse"
 
-captive_portal::
+captive_portal:
 
 logger:
   baud_rate: 0
