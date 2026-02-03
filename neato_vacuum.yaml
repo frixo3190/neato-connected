@@ -17,6 +17,7 @@ substitutions:
 web_server:
  port: 80
 
+
 esphome:
   name: neato-vacuum # If you want another name, change it here, remeber to replace it in the ha-card.yaml!
 ##############################################################################################################################
