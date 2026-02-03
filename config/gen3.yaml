@@ -2,6 +2,8 @@
 # If you need any help, don't hesitate to ask for it in the discord or discussions!
 
 # platform, based on https://esphome.io/components/#supported-microcontrollers 
+# If you are using an ESP32, set your variant to which one you have e.g. ESP32C3, ESP32S3, ESP32C6 etc
+# if you are using an ESP8266, remove the "esp32" part and define an "esp8266" you will NEED to add "restore_from_flash" to "true"
 esp32:
   variant: ESP32
   framework:
@@ -10,14 +12,28 @@ esp32:
 # You will need to figure out which pins work on your board for UART.
 substitutions:
   uart_tx: <SET BASED ON YOUR DEVICE>
-# THIS IS A BETA VERSION! IT MAY BE UNSABLE OR NOT WORKING, FOR THE LATEST PLEASE DOWNLOAD FROM RELEASES!
   uart_rx: <SET BASED ON YOUR DEVICE>
+  comment: "" # If you want to write a comment about this vacuum, do so here. e.g. "Downstairs garage vacuum"
 
-# If you want to have access via the webserver, uncomment the following 3 lines (remove the #)
+  infointerval: 2sec
+  chargerinterval: 2min
+
+  # ---- Version and robot type ----
+  version: "1.2-b.7" # THIS IS A BETA VERSION!
+  type: "gen3"
+  buildinfo: "${version}-[${uart_tx}/${uart_rx}]"
+  # --------------------------------
+
+  time_platform: homeassistant # use "homeassistant" if you are using Home Assistant, use "sntp" if not
+  timezone: null # if you have Home Assistant, you don't need this, if you use sntp, then define your timezone here!
+
+# If you don't want the webserver, uncomment/remove this part
 web_server:
   port: 80
-  version: 3
-  log: false
+  js_url: "https://cdn.jsdelivr.net/gh/philip2809/neato-connected@next/docs/esphome-config/1.2-b.7.js"
+
+logger:
+  baud_rate: 0
 
 ota:
   - platform: esphome
@@ -28,34 +44,20 @@ wifi:
   password: !secret wifi_password
 
   ap:
-    ssid: "Neato-ESPHOME"
-    password: "connect-to-your-wifi"
+    ssid: "neato-brainslug"
+    password: "make-it-suck-again"
 
   # If your router sets another TLD for local devices, specify that here
   #domain: .lan
   # If you are having issues with the dns or are 100% this will be the ip, you can spesify that here
-  #use_address: <IP OF YOUR ESP DEVICE>
+  #use_address: 192.168.205.199
 
 captive_portal:
 
-# packages:
-#   # shorthand form github://username/repository/[folder/]file-path.yml[@branch-or-tag]
-#   # remote_package_shorthand: github://esphome/non-existant-repo/file1.yml@main
-
-#   test2:
-#     url: https://github.com/Philip2809/neato-connected
-#     # files: [esphome/test.yaml, esphome/test.h]  # optional; if not specified, all files will be included
-#     ref: next  # optional
-#     refresh: 5s  # optional
-
-dashboard_import:
-  package_import_url: github://philip2809/neato-Connected/ha-card.yaml@main
-  import_full_config: false
-
 esphome:
   name: neato-vacuum # If you want another name, change it here, remeber to replace it in the ha-card.yaml!
+  name_add_mac_suffix: False # If you have multiple deivces and don't change the names you can also enable this! (Used for the prebuilt images)
 ##############################################################################################################################
-
 
 #   Combatability between esphome config and this card is ensured as long as the
 #   minor version's match, for relase candicates, betas etc (indicated by X.X-a/b/rc.X), the version
@@ -64,13 +66,16 @@ esphome:
 #   Please try to keep the versions the same, and check the github for updates!
   project: 
     name: philip2809.neato-connected
-    version: "1.2-b.3"
+    version: ${buildinfo}
+
+  comment: "${type}|${buildinfo}|${comment}"
 
   on_boot:
     - priority: 600
       then:
         - lambda: !lambda |-
             id(uiState).publish_state("Starting...");
+        - logger.set_level: INFO
 
     - priority: -100
       then:
@@ -88,6 +93,60 @@ esphome:
             }
 
             id(last_cleaning_duration).publish_state(id(g_last_cleaning_duration));
+
+            // Update nbs_time and text entity from persisted global
+            if (!id(g_timezone).empty()) {
+              id(nbs_time).set_timezone(id(g_timezone).c_str());
+              id(timezone_text).publish_state(id(g_timezone).c_str());
+              ESP_LOGI("timezone", "Restored timezone: %s", id(g_timezone).c_str());
+            }
+
+            char buf[40];
+            snprintf(
+              buf, sizeof(buf),
+              "%u,%u,%u,%u,%u,%u,%u,%u",
+              id(g_schedule)[0],
+              id(g_schedule)[1],
+              id(g_schedule)[2],
+              id(g_schedule)[3],
+              id(g_schedule)[4],
+              id(g_schedule)[5],
+              id(g_schedule)[6],
+              id(g_schedule)[7]
+            );
+
+            id(scheduleset).publish_state(buf);
+
+
+api:
+  encryption:
+    key: !secret neato_vacuum_api
+
+  actions:
+    - action: send_cmd
+      variables:
+        command: string
+      then:
+        - uart.write: !lambda |-
+            // Convert to std::string
+            std::string s = command;
+
+            // IMPORTANT: keep newline exactly like YAML version
+            if (s.empty() || s.back() != '\n')
+              s += "\n";
+
+            // convert string → vector<uint8_t>
+            return std::vector<uint8_t>(s.begin(), s.end());
+
+    - action: play_sound
+      variables:
+        soundid: int
+      then:
+        - uart.write: !lambda |-
+            // Create std::string
+            std::string s = "PlaySound SoundId " + std::to_string(soundid) + "\n";
+            // convert string → vector<uint8_t>
+            return std::vector<uint8_t>(s.begin(), s.end());
 
 
 script:
@@ -114,7 +173,7 @@ script:
       - delay: 50ms  
       - uart.write: "GetVersion \n"    
   
-  - id: initial_data_get # when the robot has booted, run this initial fetch after 5 seconds of being able to send commands, the 5 sec needed to the robot can calculate battery levet etc.
+  - id: initial_data_get # when the robot has booted, run this initial fetch after 5 seconds of being able to send commands, the 5 sec needed to the robot can calculate battery level etc.
     mode: queued
     then: 
       - delay: 5sec
@@ -140,7 +199,7 @@ script:
   - id: cleaning_stopped
     then: 
       - lambda: !lambda |-
-          uint64_t now_ts = id(homeassistant_time).now().timestamp;
+          uint64_t now_ts = id(nbs_time).now().timestamp;
           uint64_t start_ts = id(g_last_cleaning_start_time);
 
           if (start_ts > 0) {
@@ -148,6 +207,7 @@ script:
               id(g_last_cleaning_duration) = duration_min;
               id(last_cleaning_duration).publish_state(duration_min);
           }
+
   - id: play_extra_sounds
     parameters:
       soundid: int
@@ -172,7 +232,6 @@ script:
           return std::vector<uint8_t>(s.begin(), s.end());
 
 
-
 globals:
   - id: initial_ready
     type: bool
@@ -183,89 +242,55 @@ globals:
     type: std::string
     restore_value: no
 
-  # --- STORE IN FLASH, MAX 96 BYTES! ---
-  - id: g_last_cleaning_start_time         # 8 BYTES
+  # --- Restore Value ---
+  - id: g_last_cleaning_start_time
     type: uint64_t
     restore_value: yes
 
-  - id: g_last_cleaning_type               # 4 BYTES
+  - id: g_last_cleaning_type
     type: uint32_t
     restore_value: yes
 
-  - id: g_last_cleaning_duration           # 4 BYTES
+  - id: g_last_cleaning_duration
     type: uint32_t
     restore_value: yes
 
-  - id: g_play_extra_sounds                # 1 BYTE
+  - id: g_play_extra_sounds
     type: bool
     restore_value: yes
-  # --- TOTAL BYTES USED: 17 BYTES ---
+
+  - id: g_schedule
+    type: uint8_t[8]
+    restore_value: yes
+    initial_value: '{0,0,0,0,0,0,0,0}'
+
+  - id: g_timezone
+    type: std::string
+    restore_value: yes
+    initial_value: ''
 
 
 interval:
-  - interval: 2sec
+  - interval: ${infointerval}
     then:
       - uart.write: "GetErr \n"
       - uart.write: "GetState \n"
-  - interval: 2min
+  - interval: ${chargerinterval}
     then: 
       - uart.write: "GetCharger \n"
 
-api:
-  encryption:
-    key: !secret neato_vacuum_api
-
-  actions:
-    - action: send_cmd
-      variables:
-        command: string
-      then:
-        - uart.write: !lambda |-
-            // Convert to std::string
-            std::string s = command;
-
-            // IMPORTANT: keep newline exactly like YAML version
-            if (s.empty() || s.back() != '\n')
-              s += "\n";
-
-            // convert string → vector<uint8_t>
-            return std::vector<uint8_t>(s.begin(), s.end());
-
-    - action: clear_alert
-      variables:
-        alert: string
-      then:
-        - uart.write: !lambda |-
-            std::string cmd = std::string("SetUIError clearalert ") + alert + "\n";
-            return std::vector<uint8_t>(cmd.begin(), cmd.end());
-
-    - action: play_sound
-      variables:
-        soundid: int
-      then:
-        - uart.write: !lambda |-
-            // Create std::string
-            std::string s = "PlaySound SoundId " + std::to_string(soundid) + "\n";
-            // convert string → vector<uint8_t>
-            return std::vector<uint8_t>(s.begin(), s.end());
-
-
-logger:
-  baud_rate: 0
 
 uart:
   id: uart_bus
   baud_rate: 115200
   tx_pin: ${uart_tx}
   rx_pin: ${uart_rx}
-  rx_buffer_size: 65535
+  rx_buffer_size: 2048
   debug:
     dummy_receiver: true
     direction: RX
     after:
       bytes: 0
-      #timeout: 5sec
-      #delimiter: "\n"
       delimiter: "\x1A"
     sequence:
       - lambda: !lambda |-
@@ -325,7 +350,7 @@ uart:
 
           // ---- SPECIAL PARSING FOR GetErr ----
           if (command == "GetErr") {
-            // A GetErr response looks like:
+            // A GetErr response looks like for gen3:
             // 0: GetErr
             // 1: Error
             // 2: <error1>
@@ -347,6 +372,7 @@ uart:
                 id(initial_data_get).execute();
             }
           }
+
           else if (command == "GetCharger") {
             // Format after the header:
             // Label,Value
@@ -366,9 +392,6 @@ uart:
               // Trim them:
               trim(key);
               trim(value);
-
-              ESP_LOGI("charger", "Parsed: key='%s' value='%s'",
-                        key.c_str(), value.c_str());
 
               // ---- MATCH KEYS AND PUBLISH ----
                    if (key == "FuelPercent") id(chargerFuelPercent).publish_state(atof(value.c_str()));
@@ -425,18 +448,12 @@ uart:
               trim(key);
               trim(value);
 
-                   if (key == "MainBoard Serial Number") id(mainBoardSerial).publish_state(value.c_str());
-              else if (key == "MainBoard Version") id(mainBoardVersion).publish_state(value.c_str());
-              else if (key == "Serial Number") id(robotSerial).publish_state(value.c_str());
+                   if (key == "Serial Number") id(robotSerial).publish_state(value.c_str());
               else if (key == "Model") id(robotModel).publish_state(value.c_str());
-              else if (key == "Time Local") id(timeLocal).publish_state(value.c_str());
-              else if (key == "Time UTC") id(timeUTC).publish_state(value.c_str());
+              else if (key == "Software") id(robotSoftware).publish_state(value.c_str());
             }
           }
-          // ------------------------------ TESTMODE -----------------------------------------
           else if (command == "TestMode") {
-            ESP_LOGI("testmode", "LINE1: %s", lines[1].c_str());
-            //ESP_LOGI("testmode", "LINE1: %s", lines[1].c_str());
             if (lines[1].find(": On") != std::string::npos) id(testMode).publish_state(true);
             else if (lines[1].find(": Off") != std::string::npos) id(testMode).publish_state(false);
           } 
@@ -473,16 +490,16 @@ uart:
                   // Cleaning started
                   if (!old_spot && new_spot) {
                       // Mark start time
-                      id(g_last_cleaning_start_time) = id(homeassistant_time).now().timestamp;
+                      id(g_last_cleaning_start_time) = id(nbs_time).now().timestamp;
                       id(g_last_cleaning_type) = 1;  // SPOT = 1
 
-                      id(last_cleaning_time).publish_state(id(homeassistant_time).now().strftime("%Y-%m-%d %H:%M:%S"));
+                      id(last_cleaning_time).publish_state(id(nbs_time).now().strftime("%Y-%m-%d %H:%M:%S"));
                       id(last_cleaning_type).publish_state("SPOT");
                   } else if (!old_house && new_house) {
-                      id(g_last_cleaning_start_time) = id(homeassistant_time).now().timestamp;
+                      id(g_last_cleaning_start_time) = id(nbs_time).now().timestamp;
                       id(g_last_cleaning_type) = 0;  // HOUSE = 0
 
-                      id(last_cleaning_time).publish_state(id(homeassistant_time).now().strftime("%Y-%m-%d %H:%M:%S"));
+                      id(last_cleaning_time).publish_state(id(nbs_time).now().strftime("%Y-%m-%d %H:%M:%S"));
                       id(last_cleaning_type).publish_state("HOUSE");
                   } else {
                       // Cleaning stopped
@@ -519,8 +536,7 @@ uart:
                 trim(key);
                 trim(value);
 
-                     if (key == "Language") id(language).publish_state(value.c_str());
-                else if (key == "ClickSounds") id(clickSounds).publish_state(value == "ON");
+                     if (key == "ClickSounds") id(clickSounds).publish_state(value == "ON");
                 else if (key == "LED") id(led).publish_state(value == "ON");
                 else if (key == "Wall Enable") id(wallEnable).publish_state(value == "ON");
                 else if (key == "Eco Mode") id(ecoMode).publish_state(value == "ON");
@@ -544,10 +560,116 @@ uart:
                 trim(val);
                 id(numberDustBinFull).publish_state(atof(val.c_str()));
               } 
-              else if (line.find("Schedule is Enabled") != std::string::npos) id(scheduleEnabled).publish_state(true);
-              else if (line.find("Schedule is Disabled") != std::string::npos) id(scheduleEnabled).publish_state(false);
             }
           } else if (command.find("ARCHES Board") != std::string::npos) id(uiState).publish_state("Starting...");
+
+
+time:
+  - platform: ${time_platform}
+    timezone: ${timezone}
+    id: nbs_time
+    on_time:
+      - minutes: /10
+        seconds: 0
+        then:
+          - lambda: !lambda |-
+              auto now = id(nbs_time).now();
+              if (!now.is_valid()) return;
+
+              uint8_t flags = id(g_schedule)[0];
+
+              // bit 0 = global enable
+              if (!(flags & 0x01)) {
+                ESP_LOGD("schedule", "Global disabled");
+                return;
+              }
+
+              // day_of_week: Sunday=1 ... Saturday=7
+              uint8_t dow = now.day_of_week;
+
+              // bit for day enable: bit1 = Sunday, bit2 = Monday, ...
+              uint8_t day_bit = 1 << dow;
+              if (!(flags & day_bit)) {
+                ESP_LOGD("schedule", "Day %d disabled", dow);
+                return;
+              }
+
+              // schedule value for today
+              uint8_t value = id(g_schedule)[dow];
+
+              // convert value → hour/min
+              uint8_t target_hour = value / 6;
+              uint8_t target_min  = (value % 6) * 10;
+
+              ESP_LOGD("schedule",
+                "Now %02d:%02d | Target %02d:%02d (value=%d)",
+                now.hour, now.minute,
+                target_hour, target_min,
+                value
+              );
+
+              // check match
+              if (now.hour == target_hour && now.minute == target_min) {
+                ESP_LOGD("schedule", "Schedule matched → DO ACTION");
+                id(houseClean).press();
+              }
+
+
+text:
+  - platform: template
+    id: scheduleset
+    name: "ScheduleSet"
+    mode: TEXT
+    set_action:
+      lambda: !lambda |-
+        int i = 0;
+        char *p = strtok((char *)x.c_str(), ",");
+
+        while (p && i < 8) {
+          int v = atoi(p);
+
+          if (i == 0) {          // flags
+            if (v < 0) v = 0;
+            if (v > 255) v = 255;
+          } else {               // day values
+            if (v < 0) v = 0;
+            if (v > 143) v = 143;
+          }
+
+          id(g_schedule)[i++] = (uint8_t)v;
+          p = strtok(nullptr, ",");
+        }
+
+        if (i != 8) {
+          ESP_LOGW("schedule", "Invalid schedule string");
+        }
+
+        char buf[40];
+        snprintf(
+          buf, sizeof(buf),
+          "%u,%u,%u,%u,%u,%u,%u,%u",
+          id(g_schedule)[0],
+          id(g_schedule)[1],
+          id(g_schedule)[2],
+          id(g_schedule)[3],
+          id(g_schedule)[4],
+          id(g_schedule)[5],
+          id(g_schedule)[6],
+          id(g_schedule)[7]
+        );
+
+        id(scheduleset).publish_state(buf);
+
+  - platform: template
+    id: timezone_text
+    name: "Timezone"
+    mode: TEXT
+    set_action:
+      lambda: !lambda |-
+        id(timezone_text).publish_state(x.c_str()); // update this text component
+        id(g_timezone) = std::string(x.c_str()); // store tz in global
+        id(nbs_time).set_timezone(x.c_str()); // set timezone for time
+        ESP_LOGI("timezone", "Timezone set to: %s", x.c_str()); // log
 
 
 sensor:
@@ -685,11 +807,17 @@ binary_sensor:
     name: "Thermistor Present"
     entity_category: "diagnostic"
 
-time:
-  - platform: homeassistant
-    id: homeassistant_time
 
 text_sensor:
+  - platform: template
+    id: nbs_time_text
+    name: "NBS Time"
+    lambda: !lambda |-
+      char buf[10];
+      auto t = id(nbs_time).now();
+      snprintf(buf, sizeof(buf), "%02d:%02d", t.hour, t.minute);
+      return std::string(buf);
+
   # --- Last cleaning ---
   - platform: template
     name: "Last cleaning time"
@@ -709,16 +837,6 @@ text_sensor:
     name: "Robot Alert"
 
   # --- GetVersion ---
-  - platform: template
-    id: mainBoardSerial
-    name: "MainBoard Serial Number"
-    entity_category: "diagnostic"
-
-  - platform: template
-    id: mainBoardVersion
-    name: "MainBoard Version"
-    entity_category: "diagnostic"
-
   - platform: template
     id: robotSerial
     name: "Serial Number"
@@ -785,13 +903,8 @@ text_sensor:
     entity_category: "diagnostic"
 
   - platform: template
-    id: timeLocal
-    name: "Time Local"
-    entity_category: "diagnostic"
-
-  - platform: template
-    id: timeUTC
-    name: "Time UTC"
+    id: robotSoftware
+    name: "Software"
     entity_category: "diagnostic"
 
   # --- GetState ---
@@ -802,12 +915,6 @@ text_sensor:
   - platform: template
     name: "Robot State"
     id: robotState
-
-  # --- GetUserSettings ---
-  - platform: template
-    name: "Language"
-    id: language
-    entity_category: "diagnostic"
 
 
 switch:
@@ -946,18 +1053,6 @@ switch:
       - script.execute: get_user_settings
     entity_category: "diagnostic"
 
-  - platform: template
-    name: "Schedule"
-    optimistic: true
-    id: scheduleEnabled
-    turn_on_action:
-      - uart.write: "SetUserSettings Schedule ON \n"
-      - script.execute: get_user_settings
-    turn_off_action:
-      - uart.write: "SetUserSettings Schedule OFF \n"
-      - script.execute: get_user_settings
-    entity_category: "diagnostic"
-
 
 number:
   # --- Spot cleaning ---
@@ -983,6 +1078,9 @@ number:
 
 
 select:
+  - platform: logger
+    name: "Logger select"
+
   - platform: template
     name: "Navigation Mode"
     id: navigationMode
@@ -1003,6 +1101,7 @@ select:
 button:
   - platform: template
     name: "House Clean"
+    id: houseClean
     icon: mdi:home
     on_press:
       - script.execute:
@@ -1195,10 +1294,11 @@ button:
     entity_category: "diagnostic"
 
   - platform: template
-    name: "Clear All Alerts & Errors"
+    name: "Clear errors"
     icon: mdi:notification-clear-all
     on_press:
-      - uart.write: "SetUIError clearall \n"
+      then:
+        - uart.write: "SetUIError clearall \n"
     entity_category: "diagnostic"
 
   - platform: template
@@ -1217,4 +1317,4 @@ button:
 
   - platform: restart
     name: Reboot ESP
-    
+
