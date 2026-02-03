@@ -11,8 +11,8 @@ esp32:
 
 # You will need to figure out which pins work on your board for UART.
 substitutions:
-  uart_tx: <SET BASED ON YOUR DEVICE>
-  uart_rx: <SET BASED ON YOUR DEVICE>
+  uart_tx: 16
+  uart_rx: 17
   comment: "" # If you want to write a comment about this vacuum, do so here. e.g. "Downstairs garage vacuum"
 
   infointerval: 2sec
